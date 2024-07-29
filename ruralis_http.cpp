@@ -105,7 +105,7 @@ void RuralisHttp::start() {
     // クライアントからの接続を待つ
     listen(server_fd, 5);
     while(1) {
-        cout << FILE_LINE " 接続待ち server_fd=" << server_fd << endl;
+        cout << FILE_LINE RED(" 接続待ち") " server_fd=" << server_fd << endl;
         // int newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
         // int newfd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addrlen);
         int newfd = accept(server_fd, NULL, NULL);

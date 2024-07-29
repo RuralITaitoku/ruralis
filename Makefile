@@ -13,13 +13,13 @@ ruralis: ruralis.o zubolite.o libruralis.a
 	$(CPP) -o $@  ruralis.o zubolite.o -lsqlite3 -L. -lruralis
 
 
-ruralis: ruralis.o zubolite.o 
+ruralis: ruralis.o zubolite.o
 	$(CPP) -o $@  *.o -lsqlite3 
 
 
 clean:
 	rm *.o ruralis libruralis.a log.log
-all: ruralis
+all: ruralis libruralis.a
 lib: libruralis.a
 
 ruralis.o: ruralis.cpp zubolite.h ruralis.h

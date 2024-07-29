@@ -1,6 +1,9 @@
 .DS_Store
+.vscode
 *.o
 *.a
 *.log
 *.db
 ruralis
+ruralis_stop.sh
+
