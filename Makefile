@@ -6,13 +6,16 @@ CPPFLAGS= -g -Wall -DDEBUG
 .o.cpp :
 	$(CPP) $(CPPFLAGS) -o $@ -c $<
 
-ruralis: ruralis.o ruralis_http.o ruralis_sql.o zubolite.o ruralis_bytes.o
-	$(CPP) -o $@ *.o  -lsqlite3
+libruralis.a: ruralis_http.o ruralis_sql.o zubolite.o ruralis_bytes.o
+	ar rcs $@ $^
+
+ruralis: ruralis.o zubolite.o libruralis.a
+	$(CPP) -o $@  ruralis.o zubolite.o -lsqlite3 -L. -lruralis
 
 clean:
-	rm *.o *'~'
-
+	rm *.o ruralis 
 all: ruralis
+lib: libruralis.a
 
 ruralis.o: ruralis.cpp zubolite.h ruralis.h
 ruralis_bytes.o: ruralis_bytes.cpp ruralis.h
