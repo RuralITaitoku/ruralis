@@ -12,6 +12,11 @@ libruralis.a: ruralis_http.o ruralis_sql.o zubolite.o ruralis_bytes.o
 ruralis: ruralis.o zubolite.o libruralis.a
 	$(CPP) -o $@  ruralis.o zubolite.o -lsqlite3 -L. -lruralis
 
+
+ruralis: ruralis.o zubolite.o 
+	$(CPP) -o $@  *.o -lsqlite3 
+
+
 clean:
 	rm *.o ruralis libruralis.a log.log
 all: ruralis
