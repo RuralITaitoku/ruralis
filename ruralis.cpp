@@ -110,7 +110,7 @@ int main(int argv, char *argc[])
         cout << FILE_LINE << "トップフォルダ:" << top_dir << endl;
         ruralis_server_http.top_dir = top_dir;
         ruralis_server_http.content_func = &zubolite_content;
-        ruralis_server_http.port_no = 1581;
+        ruralis_server_http.port_no = port_no;
         ruralis_server_http.start();
     } catch (const exception& e) {
         cerr << RED("エラー発生\r\n") << e.what() << "\r\n" << endl;
