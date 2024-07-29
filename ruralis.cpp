@@ -10,6 +10,10 @@ using namespace std;
 
 RuralisHttp ruralis_server_http;
 
+
+#define RED(x) "\033[31m" x "\033[0m"
+
+
 void ouch(int sig) 
 {
     printf("I got signal %d\n", sig);
@@ -84,14 +88,31 @@ int main(int argv, char *argc[])
     string page_name = "こんにちは";
     cout << ruralis_sqltext(page_name) << endl;
 
-    
-
     try {
+        int port_no = 1581;
+        string top_dir = "/Library/WebServer/Documents/";
+        for (int i = 1; i < argv; i++) {
+            string opt;
+            opt = argc[i];
+            if (opt == "-p") {
+                if (i + 1 < argv) {
+                    i++;
+                    port_no = stoi(argc[i]);
+                }
+            } else {
+                top_dir = opt;
+            }
+        }
+
+        if (argv > 1) {
+        }
+        cout << FILE_LINE << "ポート番号:" << port_no << endl;
+        cout << FILE_LINE << "トップフォルダ:" << top_dir << endl;
+        ruralis_server_http.top_dir = top_dir;
         ruralis_server_http.content_func = &zubolite_content;
         ruralis_server_http.port_no = 1581;
         ruralis_server_http.start();
-        cout << "Hellow CPP\n" << endl;
     } catch (const exception& e) {
-        cerr << "エラーが発生しました。" << e.what() << endl;
+        cerr << RED("エラー発生\r\n") << e.what() << "\r\n" << endl;
     }
 }

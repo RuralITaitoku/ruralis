@@ -21,6 +21,8 @@
 #include <string.h>
 using namespace std;
 
+#define RED(x) "\033[31m" x "\033[0m"
+
 RuralisHttp::RuralisHttp() {
 
     cout << FILE_LINE "RuralisHttp コンストラクタ" << endl;
@@ -555,7 +557,7 @@ void RuralisHttp::recv_thread(int a_port_no, int a_client_fd) {
 
         if (http.response.size() > 0) {
             cout << FILE_LINE << "送信！！！！！" << endl;
-            cout << http.response << endl;
+            // cout << http.response << endl;
             const char *c_response = http.response.c_str();
             int c_size = (int)http.response.size();
             int send_result;

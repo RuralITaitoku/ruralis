@@ -98,6 +98,7 @@ public:
     int server_fd;
     int client_fd;
     int (*func)(RuralisHttp*);
+    std::string top_dir;
     std::string request;
     std::vector<std::string> request_lines;
     std::map<std::string, std::string> request_map;
