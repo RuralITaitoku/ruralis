@@ -40,7 +40,7 @@ void zubolite_square_brackets(string &src, string&dst) {
                 size_t ebracket = src.find_first_of(")", ebi + 1);
                 if (ebracket != string::npos) {
                     href = src.substr(ebi + 2, ebracket - ebi - 2);
-                    ebi = (ebracket < src.size() - 1) ? ebracket + 1 : src.size() - 1;
+                    ebi = (ebracket < src.size() - 1) ? ebracket : src.size() - 1;
                 }
             }
             if (image_href) {
@@ -82,7 +82,7 @@ void zubolite_square_brackets(string &src, string&dst) {
 }
 
 void zubolite_md_to_html(int row, int br_pass, string &src, string &table_of_contents, string &dst) {
-
+    //　行単位の処理　↓↓↓↓↓↓↓↓↓↓↓
     // #見出しの処理
     if (src[0] == '#') {
         string dst2;
@@ -91,7 +91,7 @@ void zubolite_md_to_html(int row, int br_pass, string &src, string &table_of_con
         string href = "#";
         href += id;
 
-        id += to_string(row);
+        // id += to_string(row);
 
         if (src[1] == '#') {
             if (src[2] == '#') {
@@ -143,7 +143,7 @@ void zubolite_md_to_html(int row, int br_pass, string &src, string &table_of_con
         dst += "<hr/>\r\n";
         return;
     }
-
+    //　行単位の処理　↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
     // [] の処理
     zubolite_square_brackets(src, dst);
     if (br_pass) return;
