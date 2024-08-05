@@ -255,6 +255,7 @@ void ruralis_load_file(const char *file_name, string& dst) {
         buffer[n] = '\0';
         dst += buffer;
     } while(n != 0);
+    close(fd);
 }
 
 void ruralis_replace_temp(string &temp, map<string, string> param_map, string &dst) {
