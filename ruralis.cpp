@@ -90,7 +90,7 @@ int main(int argv, char *argc[])
 
     try {
         int port_no = 1581;
-        string top_dir = "/Library/WebServer/Documents/";
+        string top_dir = "/Library/WebServer/Documents";
         for (int i = 1; i < argv; i++) {
             string opt;
             opt = argc[i];

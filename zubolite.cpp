@@ -222,6 +222,7 @@ void zubolite_content(RuralisHttp &http) {
     cout << FILE_LINE << http.client_fd << " page=" << http.param_map["page"] << endl;
     cout << FILE_LINE << http.client_fd << " Path=" << http.request_map["Path"] << endl;
     string request_path = http.request_map["Path"];
+    // ソープリクエストの処理。
     size_t find_soap = request_path.find("/soap");
     if (find_soap == 0) {
         cout << FILE_LINE << "SOAP要求！！！！！！" << endl;
@@ -236,7 +237,25 @@ void zubolite_content(RuralisHttp &http) {
         http.add_res_http200(soap_xml);
         return;
     }
+    // ファイルが存在する場合の処理。
+    size_t find_q = request_path.find("?");
+    string file_path = http.top_dir;
+    if (find_q != string::npos) {
+        file_path += request_path.substr(0, find_q);
+    } else {
+        file_path += request_path;
+    }
+    cout << FILE_LINE << "パス：" << file_path << endl;
+    int load_err = http.response_content.load(file_path);
+    if (!load_err) {
+        http.add_res_http200();
+        return;
+    }
 
+
+
+
+    // zuboliteのアプリ処理。
     vector<string> values;
 
     sqlite.open("zubolite.db");
@@ -357,7 +376,7 @@ void zubolite_content(RuralisHttp &http) {
 
     if (android != string::npos) {
         cout << FILE_LINE << "00000android = " << android << endl;
-        ruralis_load_file("html/zubolite_amdroid.html", ttemp);
+        ruralis_load_file("html/zubolite_android.html", ttemp);
     } else {
         // cout << FILE_LINE << "android = " << android << endl;
         ruralis_load_file("html/zubolite.html", ttemp);

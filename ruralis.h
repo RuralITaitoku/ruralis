@@ -23,6 +23,7 @@ public:
     RuralisBytes();
     ~RuralisBytes();
 
+    void clear();
     void add(char ch);
     int load(const std::string &filename);
     void determine_content_type(char* type = NULL);
@@ -117,6 +118,7 @@ public:
     void recv_thread(int a_port_no, int a_client_fd);
     void start();
     void close_fd();
+    void add_res_http200();
     void add_res_http200(std::string& body);
 
 };

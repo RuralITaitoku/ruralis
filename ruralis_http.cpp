@@ -103,7 +103,7 @@ void RuralisHttp::start() {
         throw runtime_error(FILE_LINE " binding error!");
     }
     // クライアントからの接続を待つ
-    listen(server_fd, 5);
+    listen(server_fd, 16);
     while(1) {
         cout << FILE_LINE RED(" 接続待ち") " server_fd=" << server_fd << endl;
         // int newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
@@ -128,6 +128,7 @@ void RuralisHttp::start() {
         client = new RuralisHttp();
         client->port_no = port_no;
         client->client_fd = newfd;
+        client->top_dir = top_dir;
         client->content_func = content_func;
         pthread_create(&thread, NULL, ruralis_http_recv_thread, client);
         pthread_detach(thread);
@@ -140,7 +141,10 @@ void RuralisHttp::start() {
     close(server_fd);
 }
 
-
+void RuralisHttp::add_res_http200() {
+    string empty;
+    add_res_http200(empty);
+}
 
 void RuralisHttp::add_res_http200(string& body) {
     cout << FILE_LINE << client_fd << " レスポンス作成" << request_map["Host"] << endl;
@@ -159,8 +163,8 @@ void RuralisHttp::add_res_http200(string& body) {
         response += "Content-Type: text/html\r\n";
     }
     response += "Connection: keep-alive\r\n";
-    response += "Vary: negotiate\r\n";
-    response += "TCN: choice\r\n";
+    // response += "Vary: negotiate\r\n";
+    // response += "TCN: choice\r\n";
 
     if (body.size() > 0) {
         snprintf(buffer, sizeof(buffer), "%ld\r\n", body.size());
@@ -476,7 +480,7 @@ void RuralisHttp::recv_thread(int a_port_no, int a_client_fd) {
     http.port_no = a_port_no;
     http.server_fd = 0;
     http.client_fd = a_client_fd;
-
+    http.top_dir = top_dir;
     cout << FILE_LINE << http.client_fd << "▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼" 
         << " ポート番号:" << http.port_no << endl;
 
@@ -556,8 +560,8 @@ void RuralisHttp::recv_thread(int a_port_no, int a_client_fd) {
         (*content_func)(http);
 
         if (http.response.size() > 0) {
-            cout << FILE_LINE << "送信！！！！！" << endl;
-            // cout << http.response << endl;
+            cout << FILE_LINE << http.client_fd << RED("送信！！！！！") << endl;
+            cout << http.response << endl;
             const char *c_response = http.response.c_str();
             int c_size = (int)http.response.size();
             int send_result;
@@ -569,26 +573,27 @@ void RuralisHttp::recv_thread(int a_port_no, int a_client_fd) {
                         goto thread_end;
                 }
             }
+            c_size = http.response_content.size;
+            for (int i = 0; i < c_size; i++) {
+                send_result = add_send_buf(http.response_content.body[i]);
+                if (send_result < 0) {
+                    cout << FILE_LINE << client_fd << "送信エラー" 
+                    << " n=" << send_result << ", errno=" << errno << endl;
+                        goto thread_end;
+                }
+            }
+            //　バスファ内の残りデータを送信。
             send_result = send_buf();
             if (send_result < 0) {
                 cout << FILE_LINE << client_fd << "送信エラー" 
                 << " n=" << send_result << ", errno=" << errno << endl;
                     goto thread_end;
             }
-        }
-        /*
-        if (http.response.size() > 0) {
-            cout << FILE_LINE << "送信！！！！！" << endl;
-            cout << http.response << endl;
-            int send_result = send(http.client_fd, http.response.c_str(), http.response.size(), 0); 
-            if (send_result < 0) {
-                cout << FILE_LINE << client_fd << "送信エラー" 
-                << " n=" << send_result << ", errno=" << errno << endl;
-                    goto thread_end;
-            }
-        }
-        */
+            http.response.clear();
+            http.response_content.clear();
 
+
+        }
         cout << FILE_LINE << http.client_fd << "▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲" << endl;
     }
 thread_end:

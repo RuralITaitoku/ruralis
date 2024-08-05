@@ -20,6 +20,10 @@ RuralisBytes::~RuralisBytes() {
         body = NULL;
     }
 }
+void RuralisBytes::clear() {
+    file_name = "";
+    size = 0;
+}
 
 void RuralisBytes::determine_content_type(char* type) {
     size_t idx;
@@ -84,7 +88,7 @@ int RuralisBytes::load(const string &name) {
             add(buffer[i]);
         }
     } while(n != 0);
-
+    close(fd);
     body[size] = '\0';
     determine_content_type();
     return 0;
