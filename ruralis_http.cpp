@@ -28,7 +28,6 @@ RuralisHttp::RuralisHttp() {
     cout << FILE_LINE "RuralisHttp コンストラクタ" << endl;
     server_fd = 0;
     client_fd = 0;
-
     buf_i = 0;
     buf_e = 0;
 
@@ -66,8 +65,10 @@ void ruralis_http_call() {
 
 }
 
-void *ruralis_http_recv_thread(void *arg) {
+int connect_count = 0;
 
+void *ruralis_http_recv_thread(void *arg) {
+    connect_count++;
     RuralisHttp *http =  (RuralisHttp *)arg;
     // int a_client_fd = http_server->client_fd;
     cout << FILE_LINE << http->client_fd << endl;
@@ -76,8 +77,10 @@ void *ruralis_http_recv_thread(void *arg) {
     http->recv_thread(http->port_no, http->client_fd);
     http->client_fd = 0;
     delete http;
+    connect_count--;
     return NULL;
 }
+
 
 void RuralisHttp::start() {
     //RuralisHttp *clientHttp;
@@ -483,10 +486,12 @@ void RuralisHttp::recv_thread(int a_port_no, int a_client_fd) {
     http.client_fd = a_client_fd;
     http.top_dir = top_dir;
     cout << FILE_LINE << http.client_fd << "▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼" 
-        << " ポート番号:" << http.port_no << endl;
+        << " ポート番号:" << http.port_no
+        << " 接続数:" << connect_count << endl;
 
     while(1) {
-        cout << FILE_LINE << http.client_fd << "▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼" << endl;
+        cout << FILE_LINE << http.client_fd << "▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼"
+                << " 接続数:" << connect_count << endl;
         http.request.clear();
         int ch;
         while ((ch = http.recv_buf()) >= 0) {
@@ -562,7 +567,7 @@ void RuralisHttp::recv_thread(int a_port_no, int a_client_fd) {
 
         if (http.response.size() > 0) {
             cout << FILE_LINE << http.client_fd << RED("送信！！！！！") << endl;
-            cout << http.response << endl;
+            // cout << http.response << endl;
             const char *c_response = http.response.c_str();
             int c_size = (int)http.response.size();
             int send_result;
