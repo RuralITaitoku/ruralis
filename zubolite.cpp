@@ -136,6 +136,17 @@ void zubolite_md_to_html(int row, int br_pass, string &src, string &table_of_con
             dst += "</h2>\r\n";
         }
         return;
+    } else {
+        int idx = src.find("```");
+        if (idx == 0) {
+            if (src.size() > 4) {
+                dst += "<div class='inline_frame'>\r\n";
+                return;
+            } else {
+                dst += "</div>\r\n";
+                return;
+            }
+        }
     }
     // ---- の処理
     size_t f_hr = src.find("----");
@@ -149,7 +160,9 @@ void zubolite_md_to_html(int row, int br_pass, string &src, string &table_of_con
     if (br_pass) return;
     dst += "</br>\r\n";
 }
-void zubolite_wlines_to_html(vector<string> &lines, string &table_of_contents, string &dst) {
+void zubolite_wlines_to_html(vector<string> &lines, string &table_of_contents, string &line_type, string &dst) {
+
+
     for (size_t i = 0; i < lines.size(); i++) {
         zubolite_md_to_html(i, 0, lines[i], table_of_contents, dst);
     }
@@ -158,13 +171,11 @@ void zubolite_wlines_to_html(vector<string> &lines, string &table_of_contents, s
 void zubolite_wtml_to_html(string &src, string &dst) {
     string table_of_contents;
     string contents;
-
+    string line_type;
     vector<string> lines;
     ruralis_line_splitting(src, lines);
 
-    
-
-    zubolite_wlines_to_html(lines, table_of_contents, contents);
+    zubolite_wlines_to_html(lines, table_of_contents, line_type, contents);
 
     if (table_of_contents.size() > 0) {
         dst += "<div class='table_of_contents'>";
@@ -204,7 +215,11 @@ void test_zubolite() {
     src += "# 見出し１\r\n";
     src += "## 見出し２\r\n";
     src += "### 見出し 3\r\n";
-    src += "\r\n";
+    src += "``` test:title\r\n";
+    src += "ああああ\r\n";
+    src += "いいいい\r\n";
+    src += "```\r\n";
+    src += "うううう\r\n";
     src += "\r\n";
     src += "\r\n";
     zubolite_wtml_to_html(src, dst);

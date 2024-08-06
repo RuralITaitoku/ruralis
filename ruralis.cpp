@@ -80,7 +80,7 @@ int main(int argv, char *argc[])
     // test_sql();
     // test_regex();
      test_url_encode();
-    // test_zubolite();
+    test_zubolite();
     test_file();
     test_esc_html();
     signal(SIGINT, ouch);
