@@ -17,6 +17,7 @@ private:
 public:
     std::string content_type;
     std::string file_name;
+    int file_size;
     char *body;
     int size;
     int capacity;
@@ -28,7 +29,7 @@ public:
     int load(const std::string &filename);
     void determine_content_type(char* type = NULL);
     void get_string(std::string &dst);
-
+    bool last(std::string &l);
 };
 
 

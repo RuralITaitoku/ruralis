@@ -1,0 +1,72 @@
+
+
+
+body {
+    background-color: #ccc;
+}
+
+.rbtn {
+    border-radius : 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    background: #6fa1ff;
+    color: #FFF;
+    text-decoration: none;
+    text-align: center;
+    overflow: hidden;
+    margin: 10px 0;
+    border : 5px solid maroon ;
+    transition: 1s;
+}
+.rbtn img{
+    transition: 0.5s;
+}
+.rbtn:hover img{
+    /*:nth-child(1)  transform: rotate(360deg);*/
+    transform: scale(1.2);
+    /*transition: 0.5s;*/
+}
+
+#result {
+    background-color: #FFF;
+    color: black;
+    border:solid 1px black;
+    width:100%;
+    height:300px;
+}
+.btnmenu {
+    margin:5px;
+    padding: 5px;
+    display: block;
+    color: black;
+    background-color: white;
+    border:solid 1px black;
+    text-align: center;
+    text-decoration: none;
+}
+#list {
+    background-color: #FFF;
+    color: black;
+    border:solid 1px black;
+}
+
+#list a {
+    text-decoration: none;
+}
+
+input, button, textarea {
+    height: 44px;
+    width: 300px;
+}
+textarea {
+    height: 80px;
+}
+
+#svg_test {
+    position : absolute;
+    top : 600px;
+    left: 600px;
+}

@@ -15,7 +15,11 @@ elif [ "$1" = "net" ]; then
     set +x
     echo ▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️ ネットワークチェック158 ▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️▪️
     set -x
-    netstat -an | grep 158
+    if [ "$OS" = "Darwin" ]; then
+    	netstat -an | grep 1581
+    else
+    	netstat -an | grep 1580
+    fi
 elif [ "$1" = "run" ]; then
     echo $OS
     set +x

@@ -117,6 +117,16 @@ void RuralisHttp::start() {
             cout << FILE_LINE << "errno=" << errno << endl;
             throw runtime_error(FILE_LINE " accept error");
         }
+        // タイムアウト構造体
+        struct timeval timeout;
+        timeout.tv_sec = 6; 
+        timeout.tv_usec = 0;
+        // SO_RCVTIMEO オプションの設定
+        if (setsockopt(newfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+            cout << FILE_LINE << "newfd=" << newfd << endl;
+            cout << FILE_LINE << "errno=" << errno << endl;
+            throw runtime_error(FILE_LINE " setsockopt error");
+        }
         /*
         char * cip = inet_ntoa(((struct sockaddr_in *)&client_addr)->sin_addr);
         cout << FILE_LINE  << newfd << " 接続:" 
@@ -428,6 +438,10 @@ int RuralisHttp::recv_buf() {
                 return -2;
             case EBADF:
                cout << FILE_LINE << client_fd <<  "EBADF Bad File Descriptor"
+                 << endl;               
+                return -2;
+            case EAGAIN:
+               cout << FILE_LINE << client_fd <<  "EAGAIN Resource temporarily unavailable"
                  << endl;               
                 return -2;
             }

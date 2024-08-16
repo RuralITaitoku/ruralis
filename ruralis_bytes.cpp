@@ -61,6 +61,7 @@ void RuralisBytes::determine_content_type(char* type) {
 
 int RuralisBytes::load(const string &name) {
     char buffer[256];
+    struct stat f_st;
     if (body == NULL) {
         body = (char*)malloc(capacity);
         if (!body) {
@@ -75,6 +76,14 @@ int RuralisBytes::load(const string &name) {
             << " file open error!" << endl;
         return 1;
     }
+    int result = fstat(fd, &f_st);
+    if (result < 0) {
+        cerr << FILE_LINE " file_name=" << file_name
+            << " fstat open error!" << endl;
+        return 1;
+    }
+    file_size = f_st.st_size;
+    cout << FILE_LINE " file size:" << file_size << endl;
     int n = 0;
     do {
         n = read(fd, buffer, sizeof(buffer) - 1);
@@ -98,6 +107,20 @@ void RuralisBytes::get_string(string &dst) {
     for (int i = 0; i < size; i++) {
         dst += body[i];
     }
+}
+
+bool RuralisBytes::last(std::string &l) {
+    if (l.size() > size) {
+        return false;
+    }
+    for (int i = 0; i < l.size(); i++) {
+        unsigned char ch = l[i];
+        int j = (size - l.size()) + i;
+        if (ch != body[j]) {
+            return false;
+        }
+    }
+    return true; 
 }
 
 
