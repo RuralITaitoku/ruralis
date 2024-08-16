@@ -43,7 +43,7 @@ function handlePositon(pos) {
     var heading = pos.coords.heading;
     count ++;
     msg = `${count}: 緯度（${ido}）経度（${keido}）方角（${heading}）`;
-    gmap.setCenter( { lat: ido, lng: keido });
+    gmap.setCenter( { lat: Number(ido), lng: Number(keido) });
     //result.innerHTML = msg;
     if (sessionStorage) {
         sessionStorage.setItem("latitude", ido);

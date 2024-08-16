@@ -6,6 +6,15 @@ function saveMemo() {
     var memo =  document.querySelector("#memo");
     var ido;
     var keido;
+
+    if (subject.validity.valid == false) {
+        alert("件名を入れてください。")
+        return;
+    }
+    if (subject.validity.valid == false) {
+        alert("メモを入れてください。")
+        return;
+    }
     if (sessionStorage) {
         ido = sessionStorage.getItem("latitude");
         keido = sessionStorage.getItem("longitude");
