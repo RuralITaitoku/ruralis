@@ -1,16 +1,17 @@
 
 let gmap;
-
+let m_list = [];
 async function initMap() {
     //@ts-ignore
     const { Map } = await google.maps.importLibrary("maps");
 
     var ido = -34.397;
     var keido = 150.644;
+    var lat, lng;
     if (sessionStorage) {
-        var lat = sessionStorage.getItem("latitude");
+        lat = sessionStorage.getItem("latitude");
         if (lat) ido = Number(lat);
-        var lng = sessionStorage.getItem("longitude");
+        lng = sessionStorage.getItem("longitude");
         if (lng) keido = Number(lng);
     }
 
@@ -19,20 +20,46 @@ async function initMap() {
         center: { lat: ido, lng: keido},
         zoom: 15,
     });
+    // removeMaker();
+    if (lat) {
+        addMaker(ido, keido, "現在地");
+    }
 }
 
 initMap();
 
 
-var h = function(str) {
-    if (str) {
-        str = str.replace(/&/g, "&amp;");
-        str = str.replace(/</g, "&lt;");
-        str = str.replace(/>/g, "&gt;");
-        return str;
-    } else {
-        return "";
+function clearMaker() {
+    console.log("removeMaker");
+    //m_list.forEarch(function(marker, index) { marker.setMap(null);});
+    for( var i = 0; i < m_list.length; i++) {
+        m_list[i].setMap(null);
     }
+    m_list = [];
+}
+function addMaker(ido, keido, marker_title) {
+    console.log("addMarker");
+
+    let marker = new google.maps.Marker({
+        position:  { lat: Number(ido), lng: Number(keido)},
+        map:gmap
+    });
+    let info = new google.maps.InfoWindow({
+        headerContent: marker_title
+    });
+    marker.addListener("click", () => {
+        console.log("click");
+        info.open({
+            anchor: marker,
+            map:gmap,
+        });
+    });
+
+    //google.maps.event.addEventListener(marker, "click", function() {
+    //    info.open(gmap, marker);
+    //});
+    m_list.push(marker);
+
 }
 
 var count = 0;
@@ -52,6 +79,63 @@ function handlePositon(pos) {
 }
 
 
+function showMemo() {
+    let memo_list = [];
+    if (localStorage) {
+        let memo_item = localStorage.getItem("位置情報メモ");
+        if (memo_item) {
+            memo_list = JSON.parse(memo_item);
+        }
+    }
+    let memo_result = "";
+    for (let i = 0; i < memo_list.length; i++) {
+        let subject = h(memo_list[i]["件名"]);
+        memo_result += `<li><a href="#" class="show" data-id="${i}">${subject}</a>`;
+        memo_result += ` <a href="#" class="del" data-id="${i}">×</a></li>`;
+    }
+    var result = document.querySelector("#list");
+    if (result) {
+        result.innerHTML = memo_result;
+    }
+    var subjects = document.querySelectorAll("#list a.del");
+    for (var i = 0; i < subjects.length; i++) {
+        subjects[i].addEventListener("click", clickDel, false);
+    }
+    var subjects = document.querySelectorAll("#list a.show");
+    for (var i = 0; i < subjects.length; i++) {
+        subjects[i].addEventListener("click", clickShow, false);
+    }
+}
+function clickShow(e) {
+    let id = e.target.getAttribute("data-id");
+    let memo_list = [];
+    if (localStorage) {
+        let memo_item = localStorage.getItem("位置情報メモ");
+        if (memo_item) {
+            memo_list = JSON.parse(memo_item);
+        }
+        clearMaker();
+        var title = memo_list[id]["件名"];
+        var ido = memo_list[id]["緯度"];
+        var keido = memo_list[id]["経度"];
+        addMaker(ido, keido, title);
+    }
+}
+function clickDel(e) {
+    let id = e.target.getAttribute("data-id");
+    let memo_list = [];
+    if (localStorage) {
+        let memo_item = localStorage.getItem("位置情報メモ");
+        if (memo_item) {
+            memo_list = JSON.parse(memo_item);
+        }
+        memo_list.splice(id, 1);
+        localStorage.setItem("位置情報メモ", JSON.stringify(memo_list));
+    }
+    showMemo();
+}
+
+
 
 window.onload = function() {
 
@@ -64,6 +148,7 @@ window.onload = function() {
         navigator.geolocation.clearWatch(w_id);
     }
     if (navigator.geolocation) {
+        console.log("onload watchPosition");
         w_id = navigator.geolocation.watchPosition(
             (pos) => { handlePositon(pos);}
             , function(err) {
@@ -76,4 +161,5 @@ window.onload = function() {
             }
         );
     }
+    showMemo();
 }

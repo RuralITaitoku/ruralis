@@ -24,7 +24,7 @@ body {
 .rbtn img{
     transition: 0.5s;
 }
-.rbtn:focus img{
+.rbtn:hover img{
     /*:nth-child(1)  transform: rotate(360deg);*/
     transform: scale(2.2);
     /*transition: 0.5s;*/

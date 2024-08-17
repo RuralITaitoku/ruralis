@@ -9,10 +9,12 @@ function saveMemo() {
 
     if (subject.validity.valid == false) {
         alert("件名を入れてください。")
+        subject.focus();
         return;
     }
     if (subject.validity.valid == false) {
         alert("メモを入れてください。")
+        memo.focus();
         return;
     }
     if (sessionStorage) {
