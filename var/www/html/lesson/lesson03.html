@@ -6,7 +6,13 @@
         <title>アルバムマップ</title>
         <link rel="stylesheet" href="lesson03.css" />
         <script src="common.js"></script>
-        <script src="https://maps.google.com/maps/api/js?key=AIzaSyBcxJX1K-T9nYEyKfSrKhvrkrG9HphxHG4&language=ja"></script>
+        <script>
+          (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+            key: "AIzaSyBcxJX1K-T9nYEyKfSrKhvrkrG9HphxHG4",
+            // Add other bootstrap parameters as needed, using camel case.
+            // Use the 'v' parameter to indicate the version to load (alpha, beta, weekly, etc.)
+          });
+        </script>
     </head>
     <body>
         <div id="result">
@@ -23,106 +29,9 @@
             <li>メモ<a href="#">aaaaaa</a></li>
             <li>メモ</li>
         </ul>
-        <a href="#" class="rbtn">
-            <img src="./kao.svg" />
-            <!--img src="https://makeine-anime.com/assets/img/top/main/thumb_visual03.jpg" /-->
-        </a>
-        <style>
-            #flip3{
-              margin: 0 0 150px; 
-            }
-            .dropmenu li{
-              list-style: none;
-              position: relative;
-              width: 30%;
-              float: left;
-              margin: 0;
-              padding: 0;
-              text-align: center;
-            }
-            .dropmenu li a{
-              display: block;
-              width: 100%;
-              margin: 0;
-              padding: 15px 0 11px;
-              background: #8a9b0f;
-              color: #fff;
-              font-size: 14px;
-              line-height: 1;
-              text-decoration: none;
-            }
-            .dropmenu li a:hover{
-              color: #fff;
-            }
-            .dropmenu li ul{
-              list-style: none;
-              position: absolute;
-              z-index: 9999;
-              top: 100%;
-              left: 0;
-              width: 100%;
-              margin: 0;
-              padding: 0;
-            }
-            .dropmenu li ul li{
-              width: 100%;
-            }
-            .dropmenu li ul li a{
-              width: 100%;
-              border-top: 1px solid #7c8c0e;
-              background: #6e7c0c;
-              text-align: center;
-            }
-            .dropmenu li:hover > a{
-              background: #6e7c0c;
-            }
-            .dropmenu li a:hover{
-              background: #616d0b;
-            }
-            #flip3 ul {
-              visibility: hidden;
-              perspective: 400px;
-            }
-            #flip3 li:hover ul{
-              visibility: visible;
-            }
-            #flip3 ul li{
-              transform: scaleX(0);
-              transform-origin: 0 0;
-              transition: .2s;
-            }
-            #flip3 li:hover ul li{
-              transform: scaleX(1.0);
-            }
-            #flip3 li:hover ul li:nth-child(1) {
-                transition-delay: 0s;
-            }
-            #flip3 li:hover ul li:nth-child(2) {
-              transition-delay: .2s;
-            }
-            #flip3 li:hover ul li:nth-child(3) {
-              transition-delay: .4s;
-            }
-            #flip3 li ul li:nth-last-of-type(1) {
-              transition-delay: 0s;
-            }
-            #flip3 li ul li:nth-last-of-type(2) {
-              transition-delay: .2s;
-            }
-            #flip3 li ul li:nth-last-of-type(3) {
-              transition-delay: .4s;
-            }
-        </style>
-            
-        <ul id="flip3" class="dropmenu">
-          <li><a href="#">メニューテスト</a>
-            <ul>
-              <li><a href="#">submenu1</a></li>
-              <li><a href="#">submenu2</a></li>
-              <li><a href="#">submenu3</a></li>
-            </ul>
-          </li>
-        </ul>
-        <script src="lesson03.js"></script>        
+        <div class="rbtn">
+          <img src="kao.svg" />
+        </div>
+        <script type="text/javascript" src="./lesson03.js"></script>        
     </body>
 </html>

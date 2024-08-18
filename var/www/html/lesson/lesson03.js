@@ -2,7 +2,6 @@
 let gmap;
 let m_list = [];
 async function initMap() {
-    //@ts-ignore
     const { Map } = await google.maps.importLibrary("maps");
 
     var ido = -34.397;
@@ -16,13 +15,11 @@ async function initMap() {
     }
 
     gmap = new Map(document.getElementById("result"), {
-        //mapTypeId: google.maps.MapTypeId.SATELLITE, 
         center: { lat: ido, lng: keido},
         zoom: 15,
     });
-    // removeMaker();
     if (lat) {
-        addMaker(ido, keido, "現在地");
+        addMaker(ido, keido, "現在地", "");
     }
 }
 
@@ -30,48 +27,39 @@ initMap();
 
 
 function clearMaker() {
-    console.log("removeMaker");
-    //m_list.forEarch(function(marker, index) { marker.setMap(null);});
     for( var i = 0; i < m_list.length; i++) {
         m_list[i].setMap(null);
     }
     m_list = [];
 }
-function addMaker(ido, keido, marker_title) {
-    console.log("addMarker");
-
+function addMaker(ido, keido, marker_title, marker_memo) {
     let marker = new google.maps.Marker({
         position:  { lat: Number(ido), lng: Number(keido)},
         map:gmap
     });
     let info = new google.maps.InfoWindow({
-        headerContent: marker_title
+        headerContent: marker_title,
+        content: marker_memo
     });
     marker.addListener("click", () => {
-        console.log("click");
         info.open({
             anchor: marker,
             map:gmap,
         });
     });
-
-    //google.maps.event.addEventListener(marker, "click", function() {
-    //    info.open(gmap, marker);
-    //});
     m_list.push(marker);
 
 }
 
 var count = 0;
 function handlePositon(pos) {
-    var result = document.querySelector("#result");
+    //var result = document.querySelector("#result");
     var ido = pos.coords.latitude;
     var keido = pos.coords.longitude;
-    var heading = pos.coords.heading;
+    //var heading = pos.coords.heading;
     count ++;
-    msg = `${count}: 緯度（${ido}）経度（${keido}）方角（${heading}）`;
+    //msg = `${count}: 緯度（${ido}）経度（${keido}）方角（${heading}）`;
     gmap.setCenter( { lat: Number(ido), lng: Number(keido) });
-    //result.innerHTML = msg;
     if (sessionStorage) {
         sessionStorage.setItem("latitude", ido);
         sessionStorage.setItem("longitude", keido);
@@ -116,9 +104,11 @@ function clickShow(e) {
         }
         clearMaker();
         var title = memo_list[id]["件名"];
+        var memo = memo_list[id]["メモ"];
         var ido = memo_list[id]["緯度"];
         var keido = memo_list[id]["経度"];
-        addMaker(ido, keido, title);
+        addMaker(ido, keido, title, hh(memo));
+        gmap.setCenter({ lat: Number(ido), lng: Number(keido)});
     }
 }
 function clickDel(e) {
@@ -152,7 +142,8 @@ window.onload = function() {
         w_id = navigator.geolocation.watchPosition(
             (pos) => { handlePositon(pos);}
             , function(err) {
-                result.innerHTML("エラー：", err.code);
+                result.innerHTML = 
+                    "エラー：" + err.code + ":" + err.message;
             }
             ,{
                 timeout:5000,
