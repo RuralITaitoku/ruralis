@@ -1,6 +1,8 @@
 
 let gmap;
 let m_list = [];
+let watch_id;
+
 async function initMap() {
     const { Map } = await google.maps.importLibrary("maps");
 
@@ -19,20 +21,20 @@ async function initMap() {
         zoom: 15,
     });
     if (lat) {
-        addMaker(ido, keido, "現在地", "");
+        addMarker(ido, keido, "現在地", "");
     }
 }
 
 initMap();
 
 
-function clearMaker() {
+function clearMarker() {
     for( var i = 0; i < m_list.length; i++) {
         m_list[i].setMap(null);
     }
     m_list = [];
 }
-function addMaker(ido, keido, marker_title, marker_memo) {
+function addMarker(ido, keido, marker_title, marker_memo) {
     let marker = new google.maps.Marker({
         position:  { lat: Number(ido), lng: Number(keido)},
         map:gmap
@@ -102,12 +104,12 @@ function clickShow(e) {
         if (memo_item) {
             memo_list = JSON.parse(memo_item);
         }
-        clearMaker();
+        clearMarker();
         var title = memo_list[id]["件名"];
         var memo = memo_list[id]["メモ"];
         var ido = memo_list[id]["緯度"];
         var keido = memo_list[id]["経度"];
-        addMaker(ido, keido, title, hh(memo));
+        addMarker(ido, keido, title, hh(memo));
         gmap.setCenter({ lat: Number(ido), lng: Number(keido)});
     }
 }
@@ -125,21 +127,28 @@ function clickDel(e) {
     showMemo();
 }
 
+function moveCurrent() {
+    console.log("moveCurrent");
+    var ido = 0.0;
+    var keido = 0.0;
+    var lat, lng;
+    if (sessionStorage) {
+        lat = sessionStorage.getItem("latitude");
+        if (lat) ido = Number(lat);
+        lng = sessionStorage.getItem("longitude");
+        if (lng) keido = Number(lng);
+        clearMarker();
+        addMarker(ido, keido, "現在地", "");
+        gmap.setCenter({ lat: Number(ido), lng: Number(keido)});
+    }
+}
 
-
-window.onload = function() {
-
-    var w_id;
-
+function initWatchPositon() {
     var result = document.querySelector("#result");
 
-    var stopwatch = document.querySelector("#stopwatch");
-    stopwatch.onclick = function() {
-        navigator.geolocation.clearWatch(w_id);
-    }
     if (navigator.geolocation) {
         console.log("onload watchPosition");
-        w_id = navigator.geolocation.watchPosition(
+        watch_id = navigator.geolocation.watchPosition(
             (pos) => { handlePositon(pos);}
             , function(err) {
                 result.innerHTML = 
@@ -152,5 +161,19 @@ window.onload = function() {
             }
         );
     }
+ 
+}
+
+window.onload = function() {
+
+ 
+ 
+    let stopwatch = document.querySelector("#stopwatch");
+    stopwatch.onclick = function() {
+        navigator.geolocation.clearWatch(w_id);
+    }
+    let showcurrent = document.querySelector("#showcurrent");
+    showcurrent.onclick = moveCurrent;
+    initWatchPositon();
     showMemo();
 }
