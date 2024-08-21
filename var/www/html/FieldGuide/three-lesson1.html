@@ -1,0 +1,94 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.167.0/build/three.module.js"
+        }
+      }
+    </script>
+    <script typt="text/javascript" src="field_guide.js"> </script>
+
+    <script type="module">
+      import * as THREE from "three";
+
+      const renderer = new THREE.WebGLRenderer({
+        canvas: document.querySelector("#myCanvas"),
+      });
+      let height = window.innerHeight / 2.0;
+      let width = window.innerWidth - 16;
+      renderer.setSize( width, height );
+      // document.body.appendChild( renderer.domElement );
+
+      const camera = new THREE.PerspectiveCamera( 45, width / height, 1, 500 );
+      camera.position.set( 0, 0, 200 );
+      camera.lookAt( 0, 0, 0 );
+
+      const scene = new THREE.Scene();
+      //create a blue LineBasicMaterial
+      const material = new THREE.LineBasicMaterial( { color: 0xffffff } );
+      let line = null;
+      let field_guide = {};
+
+      field_guide.updateLine = function(p) {
+        scene.remove(line);
+        console.log("点数：" + p.length);
+        const lpoints = [];
+        for (let i = 0; i < p.length; i++) {
+          console.log("x:" + p[i][0] + ", y:" + p[i][1]);
+          lpoints.push( new THREE.Vector3(p[i][0], p[i][1], p[i][2]) );
+        }
+        const geometry = new THREE.BufferGeometry().setFromPoints( lpoints );
+
+        line = new THREE.Line( geometry, material );
+        scene.add( line );
+        renderer.render( scene, camera );
+      };
+
+      const points = [];
+      points.push([-10, 0, 0]);
+      points.push([0, 10, 0 ]);
+      points.push([10, 0, 0 ]);
+      field_guide.updateLine(points);
+
+
+      window.onload = function() {
+        start_field_guide(field_guide);
+      }
+
+
+      tick();
+      function tick() {
+        renderer.render(scene, camera); // レンダリング
+        requestAnimationFrame(tick);
+      }
+
+</script>
+  </head>
+  <body>
+    <canvas id="myCanvas"></canvas>
+    <textarea id="result" style="width: 100%;" rows="16">
+      {
+        "経路" :[{
+            "緯度":"33.1221220541941" ,
+            "経度":"130.42065584280107"
+        },
+        {
+            "緯度":"33.12214451790059" ,
+            "経度":"130.420827504164"
+        },
+        {
+            "緯度":"33.12179183704582" ,
+            "経度":"130.42077922440566"
+        },
+        {
+            "緯度":"33.121850242890325" ,
+            "経度":"130.42059951641633"
+        }]
+      }
+          </textarea>
+    <input id="idokeido" /><button id="addIdoKeido">経路追加</button>
+    <button id="update">更新</button>
+  </body>
+</html>
