@@ -18,33 +18,95 @@
       });
       let height = window.innerHeight / 2.0;
       let width = window.innerWidth - 16;
+      renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize( width, height );
       // document.body.appendChild( renderer.domElement );
 
+      let to_camera = {}
+      to_camera.x = 0; 
+      to_camera.y = 0;
+      to_camera.z = 100;
       const camera = new THREE.PerspectiveCamera( 45, width / height, 1, 500 );
-      camera.position.set( 0, 0, 200 );
+      console.log("幅:" + height);
+      camera.position.set( to_camera.x, to_camera.y, to_camera.z );
       camera.lookAt( 0, 0, 0 );
 
+
       const scene = new THREE.Scene();
-      //create a blue LineBasicMaterial
-      const material = new THREE.LineBasicMaterial( { color: 0xffffff } );
+      const material = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth:2 } );
       let line = null;
       let field_guide = {};
+
 
       field_guide.updateLine = function(p) {
         scene.remove(line);
         console.log("点数：" + p.length);
         const lpoints = [];
+        let sum_x = 0;
+        let sum_y = 0;
         for (let i = 0; i < p.length; i++) {
           console.log("x:" + p[i][0] + ", y:" + p[i][1]);
+          sum_x += p[i][0];
+          sum_y += p[i][1];
+        }
+        let center_x = sum_x / p.length;
+        let center_y = sum_y / p.length;
+        to_camera.x = center_x;
+        to_camera.y = center_y;
+        console.log("カメラx：" + sum_x);
+
+        let max = 0;
+        for (let i = 0; i < p.length; i++) {
+          console.log("x:" + p[i][0] + ", y:" + p[i][1]);
+          let mx = Math.abs(p[i][0] - center_x);
+          let my = Math.abs(p[i][1] - center_y);
+          if (max < mx) {
+            max = mx;
+          }
+          if (max < my) {
+            max = my;
+          }
+          console.log("マックス：" + max);
+          if (width > height) {
+            to_camera.z = max * (width / height) * 2.0;
+          } else {
+            to_camera.z = max * (height / width) * 2.0;
+          }
+          if (to_camera.z < 20) {
+            to_camera.z = 20;
+          }
+          if (to_camera.z > 400) {
+            to_camera.z = 400;
+          }
           lpoints.push( new THREE.Vector3(p[i][0], p[i][1], p[i][2]) );
         }
         const geometry = new THREE.BufferGeometry().setFromPoints( lpoints );
-
         line = new THREE.Line( geometry, material );
         scene.add( line );
+
+        cursor.position.set(p[p.length - 1][0], p[p.length - 1][1])
         renderer.render( scene, camera );
       };
+
+
+      let cur_geo = new THREE.IcosahedronGeometry(2, 0);
+      // let cur_geo = new THREE.BoxGeometry(40, 40, 40);
+      // const cur_material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+      const cur_material = new THREE.MeshNormalMaterial();
+      // const cur_material = new THREE.MeshToonMaterial( { color: 0xffffff } );
+      let cursor = new THREE.Mesh(cur_geo, cur_material);
+      // cursor.receiveShadow = true;
+      scene.add(cursor);
+      // 点光源
+      let light = new THREE.PointLight(0xFFFFFF, 10, 16, 1.0);
+      scene.add(light);
+
+      // 地面を作成
+      const plane = new THREE.GridHelper(3000, 300, 0x888888, 0x888888);
+      plane.rotation.x = Math.PI / 2;  
+      // plane.position.y = -40;
+      scene.add(plane);
+
 
       const points = [];
       points.push([-10, 0, 0]);
@@ -60,6 +122,18 @@
 
       tick();
       function tick() {
+        cursor.rotation.y -= 0.03;
+        cursor.rotation.z -= 0.06;
+        light.position.set(0, 0, 3)
+        let fx = camera.position.x;
+        let fy = camera.position.y;
+        let fz = camera.position.z;
+        let tx = fx - (fx - to_camera.x) / 99;
+        let ty = fy - (fy - to_camera.y) / 99;
+        let tz = fz - (fz - to_camera.z) / 99;
+        
+        camera.position.set(tx, ty, tz);
+        camera.lookAt(tx, ty, 0);
         renderer.render(scene, camera); // レンダリング
         requestAnimationFrame(tick);
       }
@@ -70,25 +144,10 @@
     <canvas id="myCanvas"></canvas>
     <textarea id="result" style="width: 100%;" rows="16">
       {
-        "経路" :[{
-            "緯度":"33.1221220541941" ,
-            "経度":"130.42065584280107"
-        },
-        {
-            "緯度":"33.12214451790059" ,
-            "経度":"130.420827504164"
-        },
-        {
-            "緯度":"33.12179183704582" ,
-            "経度":"130.42077922440566"
-        },
-        {
-            "緯度":"33.121850242890325" ,
-            "経度":"130.42059951641633"
-        }]
+        "経路" :[]
       }
           </textarea>
-    <input id="idokeido" /><button id="addIdoKeido">経路追加</button>
+    <input id="idokeido" placeholder="緯度,経度" /><button id="addIdoKeido">経路追加</button>
     <button id="update">更新</button>
   </body>
 </html>

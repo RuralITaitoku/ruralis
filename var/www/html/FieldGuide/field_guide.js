@@ -78,9 +78,8 @@ function clickUpdate() {
     }
     let s_ido = Number(keiro[0]["緯度"]);
     let s_keido = Number(keiro[0]["経度"]);
-    points.push([0, 0, 0]);
     
-    for (let i = 1; i < keiro.length; i++) {
+    for (let i = 0; i < keiro.length; i++) {
         let ido = Number(keiro[i]["緯度"]);
         let keido = Number(keiro[i]["経度"]);
         let x = distance(ido, keido, ido, s_keido)
@@ -132,6 +131,5 @@ function handlePositon(pos) {
     jsondata["経路"].push({"緯度": Number(ido), "経度":Number(keido)})
     setResult(jsondata);
     clickUpdate();
-
 }
 
