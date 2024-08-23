@@ -89,8 +89,8 @@
           if (to_camera.z < 20) {
             to_camera.z = 20;
           }
-          if (to_camera.z > 400) {
-            to_camera.z = 400;
+          if (to_camera.z > 160) {
+            to_camera.z = 160;
           }
           lpoints.push( new THREE.Vector3(p[i][0], p[i][1], p[i][2]) );
         }
@@ -104,8 +104,9 @@
 
         let vec = { x:(to_camera.x - cur_x), y:(to_camera.y - cur_y)};
         vec = unitVec(vec);
-        if (vec.r > 160) {
-          vec.r = 160;
+        console.log(vec);
+        if (vec.r > 60) {
+          vec.r = 60;
           to_camera.x = cur_x + vec.r * vec.x;
           to_camera.y = cur_y + vec.r * vec.y;
         }
@@ -162,7 +163,6 @@
         let tx = fx - (fx - to_camera.x) / 100;
         let ty = fy - (fy - to_camera.y) / 100;
         let tz = fz - (fz - to_camera.z) / 100;
-        
         camera.position.set(tx, ty, tz);
         camera.lookAt(tx, ty, 0);
         renderer.render(scene, camera); // レンダリング
