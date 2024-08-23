@@ -43,6 +43,11 @@ function rad(degrees) {
     return degrees * Math.PI / 180;
 }
 
+function unitVec(vec) {
+    let r = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+    return {x: (vec.x / r), y: (vec.y / r), r : r};
+}
+
 const EQUATORIAL_RADIUS = 6378137;
 
 

@@ -41,6 +41,10 @@
       let line = null;
       let field_guide = {};
 
+      function unitVec(vec) {
+        let r = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+        return {x: (vec.x / r), y: (vec.y / r), r : r};
+      }
 
       field_guide.updateLine = function(p) {
         ctrl_info.p = p;
@@ -94,7 +98,17 @@
         line = new THREE.Line( geometry, material );
         scene.add( line );
 
-        cursor.position.set(p[p.length - 1][0], p[p.length - 1][1])
+        let cur_x = p[p.length - 1][0];
+        let cur_y = p[p.length - 1][1];
+        cursor.position.set(cur_x, cur_y);
+
+        let vec = { x:(to_camera.x - cur_x), y:(to_camera.y - cur_y)};
+        vec = unitVec(vec);
+        if (vec.r > 160) {
+          vec.r = 160;
+          to_camera.x = cur_x + vec.r * vec.x;
+          to_camera.y = cur_y + vec.r * vec.y;
+        }
         renderer.render( scene, camera );
       };
       field_guide.updateToCamera = function(x, y, z) {
@@ -120,7 +134,7 @@
 
       // 地面を作成
       const plane = new THREE.GridHelper(3000, 300, 0x888888, 0x888888);
-      //plane.position.y = -1;
+      // plane.position.y = -100;
       plane.rotation.x = Math.PI / 2;  
       scene.add(plane);
 
