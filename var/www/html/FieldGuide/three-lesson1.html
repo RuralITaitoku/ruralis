@@ -21,8 +21,12 @@
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize( width, height );
       // document.body.appendChild( renderer.domElement );
+      let ctrl_info = {};
+      ctrl_info.i_height = height;
+      ctrl_info.i_width = width;
 
-      let to_camera = {}
+
+      let to_camera = {};
       to_camera.x = 0; 
       to_camera.y = 0;
       to_camera.z = 100;
@@ -39,6 +43,7 @@
 
 
       field_guide.updateLine = function(p) {
+        ctrl_info.p = p;
         scene.remove(line);
         console.log("点数：" + p.length);
         const lpoints = [];
@@ -54,6 +59,8 @@
         to_camera.x = center_x;
         to_camera.y = center_y;
         console.log("カメラx：" + sum_x);
+        to_camera.cx = center_x;
+        to_camera.cy = center_y;
 
         let max = 0;
         for (let i = 0; i < p.length; i++) {
@@ -66,11 +73,14 @@
           if (max < my) {
             max = my;
           }
+          to_camera.mx = mx;
+          to_camera.my = my;
+          to_camera.my = max;
           console.log("マックス：" + max);
           if (width > height) {
-            to_camera.z = max * (width / height) * 2.0;
+            to_camera.z = height * max / height * 3;
           } else {
-            to_camera.z = max * (height / width) * 2.0;
+            to_camera.z = width * max / width * 3;
           }
           if (to_camera.z < 20) {
             to_camera.z = 20;
@@ -87,7 +97,14 @@
         cursor.position.set(p[p.length - 1][0], p[p.length - 1][1])
         renderer.render( scene, camera );
       };
-
+      field_guide.updateToCamera = function(x, y, z) {
+        to_camera.x = x;
+        to_camera.y = y;
+        to_camera.z = z;        
+      }
+      field_guide.getInfo = function() {
+        return { "カメラ位置" : to_camera, "制御情報" : ctrl_info };
+      }
 
       let cur_geo = new THREE.IcosahedronGeometry(2, 0);
       // let cur_geo = new THREE.BoxGeometry(40, 40, 40);
@@ -103,8 +120,8 @@
 
       // 地面を作成
       const plane = new THREE.GridHelper(3000, 300, 0x888888, 0x888888);
+      //plane.position.y = -1;
       plane.rotation.x = Math.PI / 2;  
-      // plane.position.y = -40;
       scene.add(plane);
 
 
@@ -128,9 +145,9 @@
         let fx = camera.position.x;
         let fy = camera.position.y;
         let fz = camera.position.z;
-        let tx = fx - (fx - to_camera.x) / 99;
-        let ty = fy - (fy - to_camera.y) / 99;
-        let tz = fz - (fz - to_camera.z) / 99;
+        let tx = fx - (fx - to_camera.x) / 100;
+        let ty = fy - (fy - to_camera.y) / 100;
+        let tz = fz - (fz - to_camera.z) / 100;
         
         camera.position.set(tx, ty, tz);
         camera.lookAt(tx, ty, 0);
@@ -149,5 +166,10 @@
           </textarea>
     <input id="idokeido" placeholder="緯度,経度" /><button id="addIdoKeido">経路追加</button>
     <button id="update">更新</button>
+    <input id="to_camera" placeholder="x, y, z" value="0, 0, 100"/>
+    <button id="btn_to_camera">カメラ位置</button>
+    <button id="btn_get_info">制御情報表示</button>
+    <textarea id="control_info" style="width: 100%;" rows="16">
+    </textarea>
   </body>
 </html>

@@ -17,6 +17,12 @@ function start_field_guide(guide) {
     let add_btn = document.querySelector("#addIdoKeido");
     add_btn.onclick = addIdoKeido;
 
+    let btn_to_camera = document.querySelector("#btn_to_camera");
+    btn_to_camera.onclick = clickToCamera;
+
+    let btn_get_info = document.querySelector("#btn_get_info");
+    btn_get_info.onclick = clickGetInfo;
+
     if (navigator.geolocation) {
         console.log("onload watchPosition");
         watch_id = navigator.geolocation.watchPosition(
@@ -63,17 +69,36 @@ function setResult(jsondata) {
     result.value = JSON.stringify(jsondata, null, 3);
 }
 
+function clickToCamera() {
+    console.log("clickUpdate");
+    let to_camera = document.querySelector("#to_camera");
+    let n = to_camera.value.split(",");
+    let x = Number(n[0]);
+    let y = Number(n[1]);
+    let z = Number(n[2]);
+    console.log("clickUpdate x=" + x + ", y=" + y + ", z=" + z);
+    field_guide.updateToCamera(x, y, z);
+}
+
+function clickGetInfo() {
+    console.log("clickGetInfo");
+    let control_info = document.querySelector("#control_info");
+    // let info = {"カメラ位置": [0, 0, 0]};
+    let info = field_guide.getInfo();
+    control_info.value = JSON.stringify(info, null, 3);
+    console.log("clickGetInfo <<<< end");
+}
+
 function clickUpdate() {
     console.log("clickUpdate");
     // let result = document.querySelector("#result");
     let jsondata = getResult();
     console.log(JSON.stringify(jsondata, null, 3));
 
-
     let keiro = jsondata["経路"];
     let points = [];
 
-    if(keiro.length <= 1) {
+    if (keiro.length <= 1) {
         return;
     }
     let s_ido = Number(keiro[0]["緯度"]);
@@ -125,7 +150,7 @@ function handlePositon(pos) {
         let d = distance(Number(ido), Number(keido), Number(last_ido), Number(last_keido));
         console.log("距離" + d);
         if (d < 1) {
-            jsondata["経路"].pop();        
+            return;
         }
     }
     jsondata["経路"].push({"緯度": Number(ido), "経度":Number(keido)})
