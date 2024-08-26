@@ -23,6 +23,18 @@ function start_field_guide(guide) {
     let btn_get_info = document.querySelector("#btn_get_info");
     btn_get_info.onclick = clickGetInfo;
 
+
+    let init_guide = document.querySelector("#init_guide");
+    init_guide.onclick = click_init_guide;
+    let refline_start = document.querySelector("#refline_start");
+    refline_start.onclick = click_refline_start;
+    let refline_end = document.querySelector("#refline_end");
+    refline_end.onclick = click_refline_end;
+    let work_width_1500 = document.querySelector("#work_width_1500");
+    work_width_1500.onclick = click_work_width_1500;
+    let work_width_16000 = document.querySelector("#work_width_16000");
+    work_width_16000.onclick = click_work_width_16000;
+
     if (navigator.geolocation) {
         console.log("onload watchPosition");
         watch_id = navigator.geolocation.watchPosition(
@@ -38,6 +50,35 @@ function start_field_guide(guide) {
         );
     }
 }
+
+function click_init_guide() {
+    let init_guide = document.querySelector("#init_guide");
+    init_guide.blur();
+    console.log("init_guide");
+}
+function click_refline_start() {
+    let refline_start = document.querySelector("#refline_start");
+    return;
+}
+function click_refline_end() {
+    let refline_end = document.querySelector("#refline_end");
+    return;
+}
+function click_work_width_1500() {
+    let work_width_1500 = document.querySelector("#work_width_1500");
+    return;
+}
+function click_work_width_16000() {
+    let work_width_16000 = document.querySelector("#work_width_16000");
+    return;
+}
+
+
+
+
+
+
+
 
 function rad(degrees) {
     return degrees * Math.PI / 180;
