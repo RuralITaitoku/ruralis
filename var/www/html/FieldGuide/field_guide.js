@@ -5,11 +5,6 @@ let watch_id;
 function start_field_guide(guide) {
     field_guide = guide;
     window.console.log("start!!");
-    let points = [];
-    points.push([-10, 0, 0]);
-    points.push([0, 10, 0]);
-    points.push([10, 0, 0]);
-    // field_guide.updateLine(points);
 
     let update_btn = document.querySelector("#update");
     update_btn.onclick = clickUpdate;
@@ -55,6 +50,14 @@ function click_init_guide() {
     let init_guide = document.querySelector("#init_guide");
     init_guide.blur();
     console.log("init_guide");
+    let points = [];
+    points.push([-10, 0, 0]);
+    field_guide.updateLine(points);
+    let jsondata = {};
+    jsondata["経路"] = [];
+    setResult(jsondata);
+
+    setTimeout(clickCanvas, 1000);
 }
 function click_refline_start() {
     let refline_start = document.querySelector("#refline_start");
@@ -182,8 +185,8 @@ function addIdoKeido() {
 
 function handlePositon(pos) {
     //var result = document.querySelector("#result");
-    var ido = pos.coords.latitude;
-    var keido = pos.coords.longitude;
+    let ido = pos.coords.latitude;
+    let keido = pos.coords.longitude;
     //var heading = pos.coords.heading;
     //msg = `${count}: 緯度（${ido}）経度（${keido}）方角（${heading}）`;
     let jsondata = getResult();
@@ -202,5 +205,15 @@ function handlePositon(pos) {
     jsondata["経路"].push({"緯度": Number(ido), "経度":Number(keido)})
     setResult(jsondata);
     clickUpdate();
+}
+
+function clickCanvas() {
+    const elem = document.querySelector("#myCanvas");
+    const x = elem.clientWidth - 16;
+    const y = elem.clientWidth - 16;
+	elem.dispatchEvent(new MouseEvent("click", {
+		clientX: x,
+		clientY: y
+	}));
 }
 

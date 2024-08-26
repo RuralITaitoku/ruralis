@@ -122,7 +122,7 @@ textarea {
   transform: scaleX(0);
   transform-origin: 0 0;
   width: 100%;
-  transition: 0.2s;
+  transition: 0.6s;
 }
 .dropmenu li:hover ul li{
   transform: scaleX(1.0);
