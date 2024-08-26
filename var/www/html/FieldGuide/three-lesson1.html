@@ -169,10 +169,22 @@
         requestAnimationFrame(tick);
       }
 
-</script>
+  </script>
+  <link rel="stylesheet" href="three-lesson1.css" />
   </head>
   <body>
-    <canvas id="myCanvas"></canvas>
+    <ul class="dropmenu">
+      <li><a href="#">☰</a>
+      <ul>
+          <li><a href="#">最初から</a></li>
+          <li><a href="#">基準線　起点</a></li>
+          <li><a href="#">基準線　終点</a></li>
+          <li><a href="#">作業幅1.5m</a></li>
+          <li><a href="#">作業幅16m</a></li>
+      </ul>
+      </li>
+  </ul>
+  <canvas id="myCanvas"></canvas>
     <textarea id="result" style="width: 100%;" rows="16">
       {
         "経路" :[]

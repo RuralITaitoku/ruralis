@@ -1,0 +1,80 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+    </head>
+    <body>
+    <ul class="dropmenu">
+        <li><a href="#">☰</a>
+        <ul>
+            <li><a href="#">最初から</a></li>
+            <li><a href="#">基準線　起点</a></li>
+            <li><a href="#">基準線　終点</a></li>
+            <li><a href="#">作業幅1.5m</a></li>
+            <li><a href="#">作業幅16m</a></li>
+        </ul>
+        </li>
+    </ul>
+    メニューテスト
+    <style>
+        .dropmenu {
+            list-style: none;
+            position: absolute;
+            float: left;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .dropmenu li{
+             width: 30%;
+        }
+        .dropmenu li a{
+            border-radius : 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 36px;
+            height: 36px;
+            background: #003300;
+            color: #FF0;
+            text-decoration: none;
+            text-align: center;
+            overflow: hidden;
+            margin: 10px 0;
+            border : 5px solid maroon ;
+            transition: 0.5s;
+
+        }
+        .dropmenu li a:hover{
+            background: #ffff00;
+            color: #003300;
+        }
+        .dropmenu li ul{
+            list-style: none;
+            position: absolute;
+            z-index: 9999;
+            top: 100%;
+            left: 0;
+            width: 300px;
+            margin: 0;
+            padding: 0;
+        }
+        .dropmenu li ul li{
+            transform: scaleX(0);
+            transform-origin: 0 0;
+            width: 100%;
+            transition: 0.2s;
+        }
+        .dropmenu li:hover ul li{
+            transform: scaleX(1.0);
+        }
+        .dropmenu li ul li a{
+            margin: 3px 0;
+            border-radius : 10%;
+            border : 3px solid maroon ;
+            width: 100%;
+        }
+
+
+    </style>
+    </body>
+</html>
