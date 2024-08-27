@@ -90,8 +90,8 @@
           if (to_camera.z < 20) {
             to_camera.z = 20;
           }
-          if (to_camera.z > 160) {
-            to_camera.z = 160;
+          if (to_camera.z > 120) {
+            to_camera.z = 120;
           }
           lpoints.push( new THREE.Vector3(p[i][0], p[i][1], p[i][2]) );
         }
@@ -106,8 +106,8 @@
         let vec = { x:(to_camera.x - cur_x), y:(to_camera.y - cur_y)};
         vec = unitVec(vec);
         console.log(vec);
-        if (vec.r > 60) {
-          vec.r = 60;
+        if (vec.r > 50) {
+          vec.r = 50;
           to_camera.x = cur_x + vec.r * vec.x;
           to_camera.y = cur_y + vec.r * vec.y;
         }
@@ -164,7 +164,10 @@
         let tx = fx - (fx - to_camera.x) / 100;
         let ty = fy - (fy - to_camera.y) / 100;
         let tz = fz - (fz - to_camera.z) / 100;
-        camera.position.set(tx, ty, tz);
+        // camera.position.set(tx, ty, tz);
+        camera.position.x = tx;
+        camera.position.y = ty;
+        camera.position.z = tz;
         camera.lookAt(tx, ty, 0);
         renderer.render(scene, camera); // レンダリング
         requestAnimationFrame(tick);
@@ -188,10 +191,13 @@
   <canvas id="myCanvas"></canvas>
   <br/>
     <textarea id="result" style="width: 100%;" rows="16">
-      {
-        "経路" :[]
-      }
-          </textarea>
+{
+  "基準起点": {},
+  "基準終点": {},
+  "作業幅": 16,
+  "経路": []
+}
+    </textarea>
     <input id="idokeido" placeholder="緯度,経度" /><button id="addIdoKeido">経路追加</button>
     <button id="update">更新</button>
     <input id="to_camera" placeholder="x, y, z" value="0, 0, 100"/>

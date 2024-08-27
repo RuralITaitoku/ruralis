@@ -55,27 +55,49 @@ function click_init_guide() {
     points.push([-10, 0, 0]);
     field_guide.updateLine(points);
     let jsondata = {};
+    jsondata["基準起点"] = {};
+    jsondata["基準終点"] = {};
+    jsondata["作業幅"] = work_width;
     jsondata["経路"] = [];
     setResult(jsondata);
 
-    setTimeout(clickCanvas, 1000);
+    clickCanvas();
 }
 function click_refline_start() {
-    let refline_start = document.querySelector("#refline_start");
-    return;
+    console.log("基準起点");
+    let jsondata = getResult();
+    let keiro = jsondata["経路"];
+    if (keiro.length > 0) {
+        let last_ido = keiro[keiro.length - 1]["緯度"];
+        let last_keido = keiro[keiro.length - 1]["経度"];
+        jsondata["基準起点"] = {"緯度": Number(last_ido), "経度":Number(last_keido)};
+    }
+    setResult(jsondata);
 }
 function click_refline_end() {
-    let refline_end = document.querySelector("#refline_end");
+    console.log("基準終点");
+    let jsondata = getResult();
+    let keiro = jsondata["経路"];
+    if (keiro.length > 0) {
+        let last_ido = keiro[keiro.length - 1]["緯度"];
+        let last_keido = keiro[keiro.length - 1]["経度"];
+        jsondata["基準終点"] = {"緯度": Number(last_ido), "経度":Number(last_keido)};
+    }
+    setResult(jsondata);
     return;
 }
 function click_work_width_3200() {
-    let work_width_3200 = document.querySelector("#work_width_3200");
+    let jsondata = getResult();
     work_width = 3.2;
+    jsondata["作業幅"] = work_width;
+    setResult(jsondata);
     clickUpdate();
 }
 function click_work_width_16000() {
-    let work_width_16000 = document.querySelector("#work_width_16000");
+    let jsondata = getResult();
     work_width = 16.0;
+    jsondata["作業幅"] = work_width;
+    setResult(jsondata);
     clickUpdate();
 }
 
