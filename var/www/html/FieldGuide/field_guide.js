@@ -61,6 +61,7 @@ function click_init_guide() {
     jsondata["経路"] = [];
     setResult(jsondata);
 
+    msg("経路情報と基準線情報を消しました。")
     clickCanvas();
 }
 function click_refline_start() {
@@ -73,6 +74,7 @@ function click_refline_start() {
         jsondata["基準起点"] = {"緯度": Number(last_ido), "経度":Number(last_keido)};
     }
     setResult(jsondata);
+    msg("基準線の起点を設定しました。");
 }
 function click_refline_end() {
     console.log("基準終点");
@@ -84,6 +86,7 @@ function click_refline_end() {
         jsondata["基準終点"] = {"緯度": Number(last_ido), "経度":Number(last_keido)};
     }
     setResult(jsondata);
+    msg("基準線の終点を設定しました。");
     return;
 }
 function click_work_width_3200() {
@@ -260,13 +263,8 @@ function handlePositon(pos) {
     clickUpdate();
 }
 
-function clickCanvas() {
-    const elem = document.querySelector("#myCanvas");
-    const x = elem.clientWidth - 16;
-    const y = elem.clientWidth - 16;
-	elem.dispatchEvent(new MouseEvent("click", {
-		clientX: x,
-		clientY: y
-	}));
+function msg(m) {
+    let msg_bar = document.querySelector("#msg_bar");
+    msg_bar.value = m;
+    msg_bar.focus();
 }
-
