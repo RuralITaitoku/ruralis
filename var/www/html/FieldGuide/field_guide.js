@@ -2,6 +2,7 @@
 
 let field_guide;
 let watch_id;
+let work_width = 16;
 function start_field_guide(guide) {
     field_guide = guide;
     window.console.log("start!!");
@@ -10,7 +11,7 @@ function start_field_guide(guide) {
     update_btn.onclick = clickUpdate;
 
     let add_btn = document.querySelector("#addIdoKeido");
-    add_btn.onclick = addIdoKeido;
+    add_btn.onclick = clickAddIdoKeido;
 
     let btn_to_camera = document.querySelector("#btn_to_camera");
     btn_to_camera.onclick = clickToCamera;
@@ -25,8 +26,8 @@ function start_field_guide(guide) {
     refline_start.onclick = click_refline_start;
     let refline_end = document.querySelector("#refline_end");
     refline_end.onclick = click_refline_end;
-    let work_width_1500 = document.querySelector("#work_width_1500");
-    work_width_1500.onclick = click_work_width_1500;
+    let work_width_3200 = document.querySelector("#work_width_3200");
+    work_width_3200.onclick = click_work_width_3200;
     let work_width_16000 = document.querySelector("#work_width_16000");
     work_width_16000.onclick = click_work_width_16000;
 
@@ -67,13 +68,15 @@ function click_refline_end() {
     let refline_end = document.querySelector("#refline_end");
     return;
 }
-function click_work_width_1500() {
-    let work_width_1500 = document.querySelector("#work_width_1500");
-    return;
+function click_work_width_3200() {
+    let work_width_3200 = document.querySelector("#work_width_3200");
+    work_width = 3.2;
+    clickUpdate();
 }
 function click_work_width_16000() {
     let work_width_16000 = document.querySelector("#work_width_16000");
-    return;
+    work_width = 16.0;
+    clickUpdate();
 }
 
 
@@ -152,7 +155,8 @@ function clickUpdate() {
     }
     let s_ido = Number(keiro[0]["緯度"]);
     let s_keido = Number(keiro[0]["経度"]);
-    
+    let fx;
+    let fy;
     for (let i = 0; i < keiro.length; i++) {
         let ido = Number(keiro[i]["緯度"]);
         let keido = Number(keiro[i]["経度"]);
@@ -164,22 +168,65 @@ function clickUpdate() {
         if (ido > s_ido) {
             y = -y;
         }
-        console.log("緯度：" + y + " 経度：" + x);
-        points.push([x, -y, 0]);
+        console.log("X：" + x + " Y：" + (-y));
+        if (i > 0) {
+            let ww = work_width / 2;
+            let vec = {};
+            vec.x = fx - x;
+            vec.y = fy - y;
+            vec = unitVec(vec);
+            let tx = x + vec.x;
+            let ty = y + vec.y;
+            points.push([tx, -ty, 0]);
+            let ltx = x + (-vec.y) * ww;
+            let lty = y + (vec.x) * ww;
+            let rtx = x + (vec.y) * ww;
+            let rty = y + (-vec.x) * ww;
+            points.push([ltx, -lty, 0]);
+            points.push([rtx, -rty, 0]);
+            points.push([tx, -ty, 0]);
+        } else {
+            points.push([x, -y, 0]);
+        }
+        fx = x;
+        fy = y;
     }
     field_guide.updateLine(points);
 }
 
 
-function addIdoKeido() {
+function clickAddIdoKeido() {
     console.log("addIdoKeido");
     let idokeido = document.querySelector("#idokeido");
     let n = idokeido.value.split(",");
     console.log("addIdoKeido" + n);
+    addIdoKeido(n[0], n[1]);
+    clickUpdate();
+}
 
-
+function addIdoKeido(ido, keido) {
+    console.log("addIdoKeido");
+    //var heading = pos.coords.heading;
+    //msg = `${count}: 緯度（${ido}）経度（${keido}）方角（${heading}）`;
     let jsondata = getResult();
-    jsondata["経路"].push({"緯度": n[0], "経度":n[1]})
+    let keiro = jsondata["経路"];
+    if (keiro.length > 0) {
+        let last_ido = keiro[keiro.length - 1]["緯度"];
+        let last_keido = keiro[keiro.length - 1]["経度"];
+        console.log("緯度：" + ido + "|" + last_ido);
+        console.log("経度：" + keido + "|" + last_keido);
+        let d = distance(Number(ido), Number(keido), Number(last_ido), Number(last_keido));
+        console.log("距離" + d);
+        if (d < 1.5) {
+            // 1.5m以下は追加しない。
+            return;
+        }
+        if (d > 100) {
+            // 100m以上は追加しない。
+            return;
+        }
+    }
+    jsondata["経路"].push({"緯度": Number(ido), "経度":Number(keido)})
     setResult(jsondata);
 }
 
@@ -187,23 +234,7 @@ function handlePositon(pos) {
     //var result = document.querySelector("#result");
     let ido = pos.coords.latitude;
     let keido = pos.coords.longitude;
-    //var heading = pos.coords.heading;
-    //msg = `${count}: 緯度（${ido}）経度（${keido}）方角（${heading}）`;
-    let jsondata = getResult();
-    let keiro = jsondata["経路"];
-    if (keiro.length > 1) {
-        let last_ido = keiro[keiro.length - 1]["緯度"];
-        let last_keido = keiro[keiro.length - 1]["経度"];
-        console.log("緯度：" + ido + "|" + last_ido);
-        console.log("経度：" + keido + "|" + last_keido);
-        let d = distance(Number(ido), Number(keido), Number(last_ido), Number(last_keido));
-        console.log("距離" + d);
-        if (d < 1) {
-            return;
-        }
-    }
-    jsondata["経路"].push({"緯度": Number(ido), "経度":Number(keido)})
-    setResult(jsondata);
+    addIdoKeido(ido, keido);
     clickUpdate();
 }
 
