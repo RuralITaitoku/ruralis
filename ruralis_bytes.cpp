@@ -36,14 +36,24 @@ void RuralisBytes::determine_content_type(char* type) {
         content_type = "text/xml";
         return;
     }
+    idx = file_name.find(".css", file_name.size() - 5);
+    if (idx != string::npos) {
+        content_type = "text/css";
+        return;
+    }
+    idx = file_name.find(".js", file_name.size() - 5);
+    if (idx != string::npos) {
+        content_type = "text/javascript";
+        return;
+    }
     idx = file_name.find(".jpg", file_name.size() - 5);
     if (idx != string::npos) {
         content_type = "image/jpeg";
         return;
     }
-    idx = file_name.find(".mp4", file_name.size() - 5);
+    idx = file_name.find(".png", file_name.size() - 5);
     if (idx != string::npos) {
-        content_type = "video/mp4";
+        content_type = "image/png";
         return;
     }
     idx = file_name.find(".mp4", file_name.size() - 5);

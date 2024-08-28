@@ -52,7 +52,7 @@ function click_init_guide() {
     init_guide.blur();
     console.log("init_guide");
     let points = [];
-    points.push([-10, 0, 0]);
+    points.push([0, 0, 0]);
     field_guide.updateLine(points);
     let jsondata = {};
     jsondata["基準起点"] = {};
@@ -60,9 +60,7 @@ function click_init_guide() {
     jsondata["作業幅"] = work_width;
     jsondata["経路"] = [];
     setResult(jsondata);
-
     msg("経路情報と基準線情報を消しました。")
-    clickCanvas();
 }
 function click_refline_start() {
     console.log("基準起点");
@@ -74,6 +72,7 @@ function click_refline_start() {
         jsondata["基準起点"] = {"緯度": Number(last_ido), "経度":Number(last_keido)};
     }
     setResult(jsondata);
+    clickUpdate();
     msg("基準線の起点を設定しました。");
 }
 function click_refline_end() {
@@ -86,8 +85,8 @@ function click_refline_end() {
         jsondata["基準終点"] = {"緯度": Number(last_ido), "経度":Number(last_keido)};
     }
     setResult(jsondata);
+    clickUpdate();
     msg("基準線の終点を設定しました。");
-    return;
 }
 function click_work_width_3200() {
     let jsondata = getResult();
@@ -95,6 +94,7 @@ function click_work_width_3200() {
     jsondata["作業幅"] = work_width;
     setResult(jsondata);
     clickUpdate();
+    msg("作業幅の表示を3.2m（ウイングハローなど）に設定しました。");
 }
 function click_work_width_16000() {
     let jsondata = getResult();
@@ -102,9 +102,8 @@ function click_work_width_16000() {
     jsondata["作業幅"] = work_width;
     setResult(jsondata);
     clickUpdate();
+    msg("作業幅の表示を16m（BSA-651など）に設定しました。");
 }
-
-
 
 
 
@@ -117,6 +116,9 @@ function rad(degrees) {
 
 function unitVec(vec) {
     let r = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+    if (r == 0) {
+        return {x:0, y:0, r:1};
+    }
     return {x: (vec.x / r), y: (vec.y / r), r : r};
 }
 
@@ -165,6 +167,19 @@ function clickGetInfo() {
     control_info.value = JSON.stringify(info, null, 3);
     console.log("clickGetInfo <<<< end");
 }
+function getIdoKeidoPoint(s_ido, s_keido, ido, keido) {
+    let n_ido = Number(ido);
+    let n_keido = Number(keido);
+    let x = distance(n_ido, n_keido, n_ido, s_keido);
+    if (keido < s_keido) {
+        x = -x;
+    }
+    let y = distance(ido, keido, s_ido, keido)
+    if (ido > s_ido) {
+        y = -y;
+    }
+    return [x, y];
+}
 
 function clickUpdate() {
     console.log("clickUpdate");
@@ -180,19 +195,46 @@ function clickUpdate() {
     }
     let s_ido = Number(keiro[0]["緯度"]);
     let s_keido = Number(keiro[0]["経度"]);
+    // 基準起点の処理。
+    let rls = jsondata["基準起点"];
+    console.log("基準起点の処理" + rls);
+    let rls_x = 0;
+    let rls_y = 0;
+    if (rls) {
+        console.log("基準起点の処理２" + rls);
+        let ido = rls["緯度"];
+        let keido = rls["経度"];
+        if (ido && keido) {
+            let ikp = getIdoKeidoPoint(s_ido, s_keido, ido, keido);
+            rls_x = ikp[0];
+            rls_y = ikp[1];
+            field_guide.setApproach(1, rls_x, -rls_y, -3, 5)
+        }
+    }
+    // 基準終点の処理。
+    let rle = jsondata["基準終点"];
+    console.log("基準終点の処理" + rls);
+    let rle_x = 0;
+    let rle_y = 0;
+    if (rle) {
+        let ido = rle["緯度"];
+        let keido = rle["経度"];
+        if (ido && keido) {
+            let ikp = getIdoKeidoPoint(s_ido, s_keido, ido, keido);
+            rle_x = ikp[0];
+            rle_y = ikp[1];
+            field_guide.setApproach(2, rle_x, -rle_y, -3, 5)
+        }
+    }
+
     let fx;
     let fy;
     for (let i = 0; i < keiro.length; i++) {
         let ido = Number(keiro[i]["緯度"]);
         let keido = Number(keiro[i]["経度"]);
-        let x = distance(ido, keido, ido, s_keido)
-        if (keido < s_keido) {
-            x = -x;
-        }
-        let y = distance(ido, keido, s_ido, keido)
-        if (ido > s_ido) {
-            y = -y;
-        }
+        let ikp = getIdoKeidoPoint(s_ido, s_keido, ido, keido);
+        let x = ikp[0];
+        let y = ikp[1];
         console.log("X：" + x + " Y：" + (-y));
         if (i > 0) {
             let ww = work_width / 2;
@@ -217,6 +259,28 @@ function clickUpdate() {
         fy = y;
     }
     field_guide.updateLine(points);
+    // 直交点の処理
+    if (rls) {
+        if (rle) {
+            let rvec = unitVec({ x:(rls_x - rle_x), y:(rls_y - rle_y)});
+            console.log("基準線" + rvec.r + ",x=" + rvec.x + ",y=" +  rvec.y);
+            // 内積
+            //let dvec =  unitVec({ x:(fx - rle_x), y:(rls_y - rle_y)});
+            //console.log()
+            let r = rvec.x * (fx - rle_x) + rvec.y * (fy - rle_y);
+            maru_x = rle_x + r * rvec.x;
+            maru_y = rle_y + r * rvec.y;
+            console.log("距離" + r);
+            field_guide.setApproach(3, maru_x, -maru_y, -2, 5);
+            let nvec = unitVec({ x:(fx - maru_x), y:(fy - maru_y)});
+            next_r = Math.round(nvec.r / work_width) * work_width;
+            console.log("四捨五入" + next_r);
+            field_guide.setApproach(4, maru_x + next_r * nvec.x, -(maru_y + next_r * nvec.y), -2, 6);
+            next_r += work_width;
+            console.log("切り上げ" + next_r);
+            field_guide.setApproach(5, maru_x + next_r * nvec.x, -(maru_y + next_r * nvec.y), -2, 3);
+        }
+    }
 }
 
 

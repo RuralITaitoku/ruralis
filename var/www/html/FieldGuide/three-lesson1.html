@@ -47,6 +47,9 @@
         return {x: (vec.x / r), y: (vec.y / r), r : r};
       }
 
+
+
+
       field_guide.updateLine = function(p) {
         ctrl_info.p = p;
         scene.remove(line);
@@ -101,8 +104,9 @@
 
         let cur_x = p[p.length - 1][0];
         let cur_y = p[p.length - 1][1];
-        cursor.position.set(cur_x, cur_y);
-
+        // cursor.position.set(cur_x, cur_y, 0);
+        ap_cursor.tx = cur_x;
+        ap_cursor.ty = cur_y;
         let vec = { x:(to_camera.x - cur_x), y:(to_camera.y - cur_y)};
         vec = unitVec(vec);
         console.log(vec);
@@ -122,14 +126,75 @@
         return { "カメラ位置" : to_camera, "制御情報" : ctrl_info };
       }
 
+      // 基準線
+      const star_texture = new THREE.TextureLoader().load("./star.png");
+      const maru_texture = new THREE.TextureLoader().load("./maru.png");
+      const next_texture = new THREE.TextureLoader().load("./next.png");
+      const lockon_texture = new THREE.TextureLoader().load("./lockon.png");
+      star_texture.colorSpace = THREE.SRGBColorSpace;
+      // 星印マテリアル。
+      const star_mtl = new THREE.SpriteMaterial({
+        map: star_texture,
+      });
+      // 接点丸印マテリアル。
+      const maru_mtl = new THREE.SpriteMaterial({
+        map: maru_texture,
+      });
+      // 接点次印マテリアル。
+      const next_mtl = new THREE.SpriteMaterial({
+        map: next_texture,
+      });
+      // ロックオンマテリアル。
+      const lockon_mtl = new THREE.SpriteMaterial({
+        map: lockon_texture,
+      });
+      let refline_s_sprite = new THREE.Sprite(star_mtl);
+      scene.add(refline_s_sprite);
+      let refline_e_sprite = new THREE.Sprite(star_mtl);
+      scene.add(refline_e_sprite);
+      let maru_sprite = new THREE.Sprite(maru_mtl);
+      scene.add(maru_sprite);
+      let next1_sprite = new THREE.Sprite(lockon_mtl);
+      scene.add(next1_sprite);
+      let next2_sprite = new THREE.Sprite(next_mtl);
+      scene.add(next2_sprite);
+      // 現在地カーソル
       let cur_geo = new THREE.IcosahedronGeometry(2, 0);
-      // let cur_geo = new THREE.BoxGeometry(40, 40, 40);
-      // const cur_material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
       const cur_material = new THREE.MeshNormalMaterial();
-      // const cur_material = new THREE.MeshToonMaterial( { color: 0xffffff } );
       let cursor = new THREE.Mesh(cur_geo, cur_material);
-      // cursor.receiveShadow = true;
       scene.add(cursor);
+      // アプローチリスト
+      let ap_cursor = {body :cursor , tx:0, ty:0, tz:1}
+      let ap_rlss = {body :refline_s_sprite,s:1, tx:0, ty:0, tz:-1, ts:0}
+      let ap_rles = {body :refline_e_sprite,s:1, tx:0, ty:0, tz:-1, ts:0}
+      let ap_maru = {body :maru_sprite,s:1, tx:0, ty:0, tz:-1, ts:0}
+      let ap_next1 = {body :next1_sprite,s:1, tx:0, ty:0, tz:-1, ts:0}
+      let ap_next2 = {body :next2_sprite,s:1, tx:0, ty:0, tz:-1, ts:0}
+      let ap_list = [ap_cursor, ap_rlss, ap_rles, ap_maru, ap_next1, ap_next2];
+      console.log("スプライト追加");
+
+
+      function Approaching(aplist) {
+        for (let i = 0; i < aplist.length; i++) {
+          let ap = aplist[i];
+          let fx = ap.body.position.x;
+          let fy = ap.body.position.y;
+          let fz = ap.body.position.z;
+          ap.body.position.x = fx + (ap.tx - fx) / 66;
+          ap.body.position.y = fy + (ap.ty - fy) / 66;
+          ap.body.position.z = fz + (ap.tz - fz) / 66;
+          if (ap.s) {
+            ap.s = ap.s + (ap.ts - ap.s) / 99;
+            ap.body.scale.set(ap.s, ap.s, ap.s);
+          }
+        }
+      }
+      field_guide.setApproach = function(idx, tx, ty, tz, ts) {
+        ap_list[idx].tx = tx;
+        ap_list[idx].ty = ty;
+        ap_list[idx].tz = tz;
+        ap_list[idx].ts = ts;
+      }
       // 点光源
       let light = new THREE.PointLight(0xFFFFFF, 10, 16, 1.0);
       scene.add(light);
@@ -142,9 +207,9 @@
 
 
       const points = [];
-      points.push([-10, 0, 0]);
-      points.push([0, 10, 0 ]);
-      points.push([10, 0, 0 ]);
+      points.push([-0.0001, 0, 0]);
+      points.push([0, 1, 0 ]);
+      points.push([0.0001, 0, 0 ]);
       field_guide.updateLine(points);
 
 
@@ -164,6 +229,7 @@
         let tx = fx - (fx - to_camera.x) / 100;
         let ty = fy - (fy - to_camera.y) / 100;
         let tz = fz - (fz - to_camera.z) / 100;
+        Approaching(ap_list);
         // camera.position.set(tx, ty, tz);
         camera.position.x = tx;
         camera.position.y = ty;
