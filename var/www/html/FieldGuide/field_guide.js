@@ -260,8 +260,8 @@ function clickUpdate() {
     }
     field_guide.updateLine(points);
     // 直交点の処理
-    if (rls) {
-        if (rle) {
+    if (rls["緯度"]) {
+        if (rle["緯度"]) {
             let rvec = unitVec({ x:(rls_x - rle_x), y:(rls_y - rle_y)});
             console.log("基準線" + rvec.r + ",x=" + rvec.x + ",y=" +  rvec.y);
             // 内積
