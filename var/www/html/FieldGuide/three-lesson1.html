@@ -26,11 +26,11 @@
       ctrl_info.i_height = height;
       ctrl_info.i_width = width;
 
-
       let to_camera = {};
       to_camera.x = 0; 
       to_camera.y = 0;
       to_camera.z = 100;
+      to_camera.max_z = 90;
       const camera = new THREE.PerspectiveCamera( 45, width / height, 1, 500 );
       console.log("幅:" + height);
       camera.position.set( to_camera.x, to_camera.y, to_camera.z );
@@ -90,11 +90,11 @@
           } else {
             to_camera.z = width * max / width * 3;
           }
+          if (to_camera.z > to_camera.max_z) {
+            to_camera.z = to_camera.max_z;
+          }
           if (to_camera.z < 20) {
             to_camera.z = 20;
-          }
-          if (to_camera.z > 120) {
-            to_camera.z = 120;
           }
           lpoints.push( new THREE.Vector3(p[i][0], p[i][1], p[i][2]) );
         }
@@ -110,17 +110,17 @@
         let vec = { x:(to_camera.x - cur_x), y:(to_camera.y - cur_y)};
         vec = unitVec(vec);
         console.log(vec);
-        if (vec.r > 50) {
-          vec.r = 50;
+        // カメラ半径
+        if (vec.r > (to_camera.max_z / 5)) {
+          vec.r = (to_camera.max_z / 5);
           to_camera.x = cur_x + vec.r * vec.x;
           to_camera.y = cur_y + vec.r * vec.y;
         }
         renderer.render( scene, camera );
       };
-      field_guide.updateToCamera = function(x, y, z) {
-        to_camera.x = x;
-        to_camera.y = y;
-        to_camera.z = z;        
+      field_guide.updateToCamera = function(z, mz) {
+        to_camera.z = z;
+        to_camera.max_z = mz;
       }
       field_guide.getInfo = function() {
         return { "カメラ位置" : to_camera, "制御情報" : ctrl_info };
@@ -246,10 +246,14 @@
     <ul class="dropmenu">
       <li><a href="#">☰</a>
       <ul>
-          <li><a id="refline_start">基準線　起点</a></li>
-          <li><a id="refline_end">基準線　終点</a></li>
-          <li><a id="work_width_3200">作業幅3.2m</a></li>
-          <li><a id="work_width_16000">作業幅16m</a></li>
+        <li><a id="refline_start">列始め</a></li>
+          <li><a id="refline_end">列終り</a></li>
+          <li><a id="work_width_3200">幅3.2m</a></li>
+          <li><a id="work_width_16000">幅16m</a></li>
+          <li><a id="myopia">近視</a></li>
+          <li><a id="noropia">通常</a></li>
+          <li><a id="hyperopia">遠視</a></li>
+          <li><br/></li>
           <li><a id="init_guide">最初から</a></li>
       </ul>
       </li>
@@ -257,7 +261,7 @@
   <canvas id="myCanvas"></canvas>
   <br/>
   <input id="msg_bar" style="width: 100%;"/>
-  <textarea id="result" style="width: 100%;" rows="16">
+  <textarea id="result" style="width: 100%;">
 {
   "基準起点": {},
   "基準終点": {},
@@ -267,7 +271,7 @@
     </textarea>
     <input id="idokeido" placeholder="緯度,経度" /><button id="addIdoKeido">経路追加</button>
     <button id="update">更新</button>
-    <input id="to_camera" placeholder="x, y, z" value="0, 0, 100"/>
+    <input id="to_camera" placeholder="z, 最大z" value="100, 100"/>
     <button id="btn_to_camera">カメラ位置</button>
     <button id="btn_get_info">制御情報表示</button>
     <textarea id="control_info" style="width: 100%;" rows="16">

@@ -20,6 +20,13 @@ function start_field_guide(guide) {
     btn_get_info.onclick = clickGetInfo;
 
 
+    let myopia = document.querySelector("#myopia");
+    myopia.onclick = click_myopia;
+    let noropia = document.querySelector("#noropia");
+    noropia.onclick = click_noropia;
+    let hyperopia = document.querySelector("#hyperopia");
+    hyperopia.onclick = click_hyperopia;
+
     let init_guide = document.querySelector("#init_guide");
     init_guide.onclick = click_init_guide;
     let refline_start = document.querySelector("#refline_start");
@@ -47,6 +54,21 @@ function start_field_guide(guide) {
     }
 }
 
+function click_myopia() {
+    field_guide.updateToCamera(45, 45);
+    clickUpdate();
+    msg("近視");
+}
+function click_noropia() {
+    field_guide.updateToCamera(90, 90);
+    clickUpdate();
+    msg("通常視");
+}
+function click_hyperopia() {
+    field_guide.updateToCamera(180, 180);
+    clickUpdate();
+    msg("遠視");
+}
 function click_init_guide() {
     let init_guide = document.querySelector("#init_guide");
     init_guide.blur();
@@ -61,6 +83,7 @@ function click_init_guide() {
     jsondata["経路"] = [];
     setResult(jsondata);
     msg("経路情報と基準線情報を消しました。")
+    window.location.reload();
 }
 function click_refline_start() {
     console.log("基準起点");
@@ -73,7 +96,7 @@ function click_refline_start() {
     }
     setResult(jsondata);
     clickUpdate();
-    msg("基準線の起点を設定しました。");
+    msg("基準列の起点を設定しました。");
 }
 function click_refline_end() {
     console.log("基準終点");
@@ -86,7 +109,7 @@ function click_refline_end() {
     }
     setResult(jsondata);
     clickUpdate();
-    msg("基準線の終点を設定しました。");
+    msg("基準列の終点を設定しました。");
 }
 function click_work_width_3200() {
     let jsondata = getResult();
@@ -102,13 +125,8 @@ function click_work_width_16000() {
     jsondata["作業幅"] = work_width;
     setResult(jsondata);
     clickUpdate();
-    msg("作業幅の表示を16m（BSA-651など）に設定しました。");
+    msg("作業幅の表示を16m（ハイクリブームBSA-651など）に設定しました。");
 }
-
-
-
-
-
 
 function rad(degrees) {
     return degrees * Math.PI / 180;
@@ -152,11 +170,10 @@ function clickToCamera() {
     console.log("clickUpdate");
     let to_camera = document.querySelector("#to_camera");
     let n = to_camera.value.split(",");
-    let x = Number(n[0]);
-    let y = Number(n[1]);
-    let z = Number(n[2]);
-    console.log("clickUpdate x=" + x + ", y=" + y + ", z=" + z);
-    field_guide.updateToCamera(x, y, z);
+    let z = Number(n[0]);
+    let mz = Number(n[1]);
+    console.log("clickUpdate z=" + z + ", mz=" + mz);
+    field_guide.updateToCamera(z, mz);
 }
 
 function clickGetInfo() {
@@ -167,6 +184,7 @@ function clickGetInfo() {
     control_info.value = JSON.stringify(info, null, 3);
     console.log("clickGetInfo <<<< end");
 }
+
 function getIdoKeidoPoint(s_ido, s_keido, ido, keido) {
     let n_ido = Number(ido);
     let n_keido = Number(keido);
@@ -260,13 +278,11 @@ function clickUpdate() {
     }
     field_guide.updateLine(points);
     // 直交点の処理
-    if (rls["緯度"]) {
-        if (rle["緯度"]) {
+    if (rls && rls["緯度"]) {
+        if (rle && rle["緯度"]) {
             let rvec = unitVec({ x:(rls_x - rle_x), y:(rls_y - rle_y)});
             console.log("基準線" + rvec.r + ",x=" + rvec.x + ",y=" +  rvec.y);
             // 内積
-            //let dvec =  unitVec({ x:(fx - rle_x), y:(rls_y - rle_y)});
-            //console.log()
             let r = rvec.x * (fx - rle_x) + rvec.y * (fy - rle_y);
             maru_x = rle_x + r * rvec.x;
             maru_y = rle_y + r * rvec.y;
@@ -275,10 +291,10 @@ function clickUpdate() {
             let nvec = unitVec({ x:(fx - maru_x), y:(fy - maru_y)});
             next_r = Math.round(nvec.r / work_width) * work_width;
             console.log("四捨五入" + next_r);
-            field_guide.setApproach(4, maru_x + next_r * nvec.x, -(maru_y + next_r * nvec.y), -2, 6);
+            field_guide.setApproach(4, maru_x + next_r * nvec.x, -(maru_y + next_r * nvec.y), 3, 6);
             next_r += work_width;
             console.log("切り上げ" + next_r);
-            field_guide.setApproach(5, maru_x + next_r * nvec.x, -(maru_y + next_r * nvec.y), -2, 3);
+            field_guide.setApproach(5, maru_x + next_r * nvec.x, -(maru_y + next_r * nvec.y), -1, 3);
         }
     }
 }
@@ -306,8 +322,8 @@ function addIdoKeido(ido, keido) {
         console.log("経度：" + keido + "|" + last_keido);
         let d = distance(Number(ido), Number(keido), Number(last_ido), Number(last_keido));
         console.log("距離" + d);
-        if (d < 1.5) {
-            // 1.5m以下は追加しない。
+        if (d < 1) {
+            // 1m以下は追加しない。
             return;
         }
         if (d > 100) {
@@ -330,5 +346,5 @@ function handlePositon(pos) {
 function msg(m) {
     let msg_bar = document.querySelector("#msg_bar");
     msg_bar.value = m;
-    msg_bar.focus();
+    // msg_bar.focus();
 }
