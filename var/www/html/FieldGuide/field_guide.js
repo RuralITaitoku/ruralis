@@ -174,7 +174,16 @@ function getResult() {
             // localStorage.setItem("GPSロガー", JSON.stringify(memo_list));
         }
     }
-    return jsondata;
+    if (jsondata) {
+        return jsondata;
+    } else {
+        // データが取得できなかった。場合。
+        let newjsondata = {};
+        newjsondata["基準起点"] = {};
+        newjsondata["基準終点"] = {};
+        newjsondata["作業幅"] = work_width;
+        newjsondata["経路"] = [];
+    }
 }
 function setResult(jsondata) {
     let result = document.querySelector("#result");
