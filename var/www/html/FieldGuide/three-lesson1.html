@@ -51,7 +51,9 @@
 
 
       field_guide.updateLine = function(p) {
+        ctrl_info.p_len = p.length;
         ctrl_info.p = p;
+
         scene.remove(line);
         console.log("点数：" + p.length);
         const lpoints = [];
@@ -259,6 +261,9 @@
       </li>
   </ul>
   <canvas id="myCanvas"></canvas>
+  <br/>
+  <br/>
+  <br/>
   <br/>
   <input id="msg_bar" style="width: 100%;"/>
   <textarea id="result" style="width: 100%;">

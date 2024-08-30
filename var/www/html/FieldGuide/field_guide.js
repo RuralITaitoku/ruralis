@@ -5,7 +5,11 @@ let watch_id;
 let work_width = 16;
 function start_field_guide(guide) {
     field_guide = guide;
-    window.console.log("start!!");
+    console.log("start!!");
+    let result = document.querySelector("#result");
+    result.value = "";
+    let jsondata = getResult();
+    setResult(jsondata);
 
     let update_btn = document.querySelector("#update");
     update_btn.onclick = clickUpdate;
@@ -52,6 +56,7 @@ function start_field_guide(guide) {
             }
         );
     }
+    clickUpdate();
 }
 
 function click_myopia() {
@@ -65,8 +70,7 @@ function click_noropia() {
     msg("通常視");
 }
 function click_hyperopia() {
-    field_guide.updateToCamera(180, 180);
-    clickUpdate();
+    field_guide.updateToCamera(180, 300);
     msg("遠視");
 }
 function click_init_guide() {
@@ -96,7 +100,7 @@ function click_refline_start() {
     }
     setResult(jsondata);
     clickUpdate();
-    msg("基準列の起点を設定しました。");
+    msg("ここを基準列の起点に設定");
 }
 function click_refline_end() {
     console.log("基準終点");
@@ -109,7 +113,7 @@ function click_refline_end() {
     }
     setResult(jsondata);
     clickUpdate();
-    msg("基準列の終点を設定しました。");
+    msg("ここを基準列の終点に設定");
 }
 function click_work_width_3200() {
     let jsondata = getResult();
@@ -117,7 +121,7 @@ function click_work_width_3200() {
     jsondata["作業幅"] = work_width;
     setResult(jsondata);
     clickUpdate();
-    msg("作業幅の表示を3.2m（ウイングハローなど）に設定しました。");
+    msg("作業幅の表示を3.2m（ウイングハローなど）に設定");
 }
 function click_work_width_16000() {
     let jsondata = getResult();
@@ -125,7 +129,7 @@ function click_work_width_16000() {
     jsondata["作業幅"] = work_width;
     setResult(jsondata);
     clickUpdate();
-    msg("作業幅の表示を16m（ハイクリブームBSA-651など）に設定しました。");
+    msg("作業幅の表示を16m（ハイクリブームなど）に設定");
 }
 
 function rad(degrees) {
@@ -157,13 +161,27 @@ function distance(lat1, lon1, lat2, lon2) {
 
 function getResult() {
     let result = document.querySelector("#result");
-    let jsondata = JSON.parse(result.value);
+    let jsondata;
+    if (result.value.length > 0) {
+        jsondata = JSON.parse(result.value);
+    } else {
+        if (localStorage) {
+            let log = localStorage.getItem("GPSロガー");
+            if (log) {
+                jsondata = JSON.parse(log);
+            }
+            //memo_list.splice(id, 1);
+            // localStorage.setItem("GPSロガー", JSON.stringify(memo_list));
+        }
+    }
     return jsondata;
-
 }
 function setResult(jsondata) {
     let result = document.querySelector("#result");
     result.value = JSON.stringify(jsondata, null, 3);
+    if (localStorage) {
+        localStorage.setItem("GPSロガー", result.value);
+    }
 }
 
 function clickToCamera() {
@@ -199,11 +217,39 @@ function getIdoKeidoPoint(s_ido, s_keido, ido, keido) {
     return [x, y];
 }
 
+function forget() {
+    let jsondata = getResult();
+
+    let keiro = jsondata["経路"];
+    let newkeiro = [];
+    let f_ido;
+    let f_keido;
+    for (let i = keiro.length - 1; i >= 0; i--) {
+        let ido = Number(keiro[i]["緯度"]);
+        let keido = Number(keiro[i]["経度"]);
+        let d = distance(ido, keido, f_ido, f_keido);
+        let min_d = (keiro.length - i) / 100;
+        if (d < min_d) {
+            // 最低距離以下は忘れる。
+            continue;
+        }
+        newkeiro.push({"緯度":ido, "経度":keido});
+    }
+    newkeiro.reverse();
+    jsondata["経路"] = newkeiro;
+    setResult(jsondata);
+}
+
+
 function clickUpdate() {
     console.log("clickUpdate");
+    forget();
     // let result = document.querySelector("#result");
     let jsondata = getResult();
     console.log(JSON.stringify(jsondata, null, 3));
+    if (jsondata["作業幅"]) {
+        work_width = Number(jsondata["作業幅"]);
+    }
 
     let keiro = jsondata["経路"];
     let points = [];
