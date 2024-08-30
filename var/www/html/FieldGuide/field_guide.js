@@ -70,7 +70,7 @@ function click_noropia() {
     msg("通常視");
 }
 function click_hyperopia() {
-    field_guide.updateToCamera(180, 300);
+    field_guide.updateToCamera(330, 330);
     msg("遠視");
 }
 function click_init_guide() {
@@ -231,8 +231,8 @@ function forget() {
 
     let keiro = jsondata["経路"];
     let newkeiro = [];
-    let f_ido;
-    let f_keido;
+    let f_ido = 0;
+    let f_keido = 0;
     for (let i = keiro.length - 1; i >= 0; i--) {
         let ido = Number(keiro[i]["緯度"]);
         let keido = Number(keiro[i]["経度"]);
@@ -243,6 +243,8 @@ function forget() {
             continue;
         }
         newkeiro.push({"緯度":ido, "経度":keido});
+        f_ido = ido;
+        f_keido = keido;
     }
     newkeiro.reverse();
     jsondata["経路"] = newkeiro;
@@ -281,7 +283,7 @@ function clickUpdate() {
             let ikp = getIdoKeidoPoint(s_ido, s_keido, ido, keido);
             rls_x = ikp[0];
             rls_y = ikp[1];
-            field_guide.setApproach(1, rls_x, -rls_y, -3, 5)
+            field_guide.setApproach(1, rls_x, -rls_y, 1, 5)
         }
     }
     // 基準終点の処理。
@@ -381,8 +383,8 @@ function addIdoKeido(ido, keido) {
             // 1m以下は追加しない。
             return;
         }
-        if (d > 100) {
-            // 100m以上は追加しない。
+        if (d > 10000) {
+            // 10Km以上は追加しない。
             return;
         }
     }
