@@ -237,7 +237,7 @@ function forget() {
         let ido = Number(keiro[i]["緯度"]);
         let keido = Number(keiro[i]["経度"]);
         let d = distance(ido, keido, f_ido, f_keido);
-        let min_d = (keiro.length - i) / 100;
+        let min_d = (keiro.length - i) / 17;
         if (d < min_d) {
             // 最低距離以下は忘れる。
             continue;
@@ -298,7 +298,7 @@ function clickUpdate() {
             let ikp = getIdoKeidoPoint(s_ido, s_keido, ido, keido);
             rle_x = ikp[0];
             rle_y = ikp[1];
-            field_guide.setApproach(2, rle_x, -rle_y, -3, 5)
+            field_guide.setApproach(2, rle_x, -rle_y, 1, 5)
         }
     }
 
@@ -351,7 +351,7 @@ function clickUpdate() {
             field_guide.setApproach(4, maru_x + next_r * nvec.x, -(maru_y + next_r * nvec.y), 3, 6);
             next_r += work_width;
             console.log("切り上げ" + next_r);
-            field_guide.setApproach(5, maru_x + next_r * nvec.x, -(maru_y + next_r * nvec.y), -1, 3);
+            field_guide.setApproach(5, maru_x + next_r * nvec.x, -(maru_y + next_r * nvec.y), 1, 3);
         }
     }
 }
