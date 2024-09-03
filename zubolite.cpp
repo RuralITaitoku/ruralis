@@ -1,6 +1,8 @@
 
 #include "zubolite.h"
 using namespace std;
+#include <sstream>
+#include <iomanip>
 
 
 RuraliSql sqlite;
@@ -229,6 +231,8 @@ void test_zubolite() {
 }
 
 void zubolite_content(RuralisHttp &http) {
+    sqlite.open("zubolite.db");
+
     pthread_t tid;
     char str_tid[256];
     tid = pthread_self();
@@ -252,6 +256,87 @@ void zubolite_content(RuralisHttp &http) {
         http.add_res_http200(soap_xml);
         return;
     }
+
+    // 筆ポリゴンの処理
+    size_t find_fpolygon = request_path.find("/fpolygon");
+    if (find_fpolygon == 0) {
+        http.response_content.content_type = "application/json";
+        string ply_json;
+        ply_json = "{";
+        ply_json += "\"筆ポリゴン\":[";
+        // 緯度は±0.0033
+        // 経度は±0.0033
+        double ido = 0.0;
+        double keido = 0.0;
+        try {
+            ido = std::stod(http.param_map["ido"]);
+            keido =  std::stod(http.param_map["keido"]);
+        } catch (const exception& e) {
+            cerr << FILE_LINE << e.what() << endl;
+        }
+        double f_ido = ido - 0.0023;
+        double t_ido = ido + 0.0023;
+        double f_keido = keido - 0.0023;
+        double t_keido = keido + 0.0023;
+
+        //ply_json += std::to_string(ido);
+        //ply_json += ",";
+        //ply_json += std::to_string(keido);
+        //ply_json += "\n";
+        // farmland_polygon (center_ido, center_keido, coordinates)
+
+        string sql = "select coordinates from farmland_polygon where ";
+        stringstream where;
+        where <<  " center_ido > " << std::setprecision(16) << f_ido << " and ";
+        where <<  " center_ido < " << std::setprecision(16) << t_ido << " and ";
+        where <<  " center_keido > " << std::setprecision(16) << f_keido << " and ";
+        where <<  " center_keido < " << std::setprecision(16) << t_keido;
+        sql += where.str();
+        vector< vector<string> > result_data;
+
+        string result = sqlite.select(sql, result_data);
+
+        if (result.length() > 0) {
+            cout << FILE_LINE << result << endl;
+        } else {
+            ply_json += "\n";
+            for (int i = 0; i < result_data.size(); i++) {
+                if (i) {
+                    ply_json += ",";
+                } else {
+                    ply_json += " ";
+                }
+                ply_json += "[";
+                ply_json += result_data[i][0];
+                ply_json += "]\n";
+            }
+        }
+        ply_json += "]\n";
+        ply_json += ",\"出典\":\"2024年　農林水産省　筆ポリゴンデータ\"\n";
+        ply_json += ",\"緯度\":";
+        ply_json += to_string(ido);
+        ply_json += "\n";
+        ply_json += ",\"経度\":";
+        ply_json += to_string(keido);
+        ply_json += "\n";
+        ply_json += ",\"筆数\":";
+        ply_json += to_string(result_data.size()); 
+        ply_json += "\n,\"範囲\":\"";
+        ply_json += to_string(f_ido);
+        ply_json += " < 緯度 < ";
+        ply_json += to_string(t_ido);
+        ply_json += " && ";
+        ply_json += to_string(f_keido);
+        ply_json += " < 経度 < ";
+        ply_json += to_string(t_keido);
+        ply_json += "\"";
+        ply_json += "\n}";
+        http.add_res_http200(ply_json);
+        return;
+    }
+
+
+
     // ファイルが存在する場合の処理。
     size_t find_q = request_path.find("?");
     string file_path = http.top_dir;
@@ -273,7 +358,6 @@ void zubolite_content(RuralisHttp &http) {
     // zuboliteのアプリ処理。
     vector<string> values;
 
-    sqlite.open("zubolite.db");
 
     string table_name = "page";
     vector<string> columns;

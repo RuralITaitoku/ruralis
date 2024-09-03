@@ -2,8 +2,10 @@
 .vscode
 *.o
 *.a
+*.so
 *.log
 *.db
 ruralis
+fp2sql
 ruralis_stop.sh
 

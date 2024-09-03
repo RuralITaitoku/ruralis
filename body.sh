@@ -38,6 +38,9 @@ elif [ "$1" = "log" ]; then
     tail -f log.log
 elif [ "$1" = "stop" ]; then
     sh ruralis_stop.sh
+elif [ "$1" = "fp2" ]; then
+    make all
+    ./fp2sql farmland_polygon/yanagawa_polygon.json 
 else
     make all
 fi
