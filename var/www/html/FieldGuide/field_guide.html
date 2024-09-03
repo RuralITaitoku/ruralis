@@ -1,0 +1,288 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.167.0/build/three.module.js"
+        }
+      }
+    </script>
+    <script typt="text/javascript" src="field_guide.js"> </script>
+
+    <script type="module">
+      import * as THREE from "three";
+
+      const renderer = new THREE.WebGLRenderer({
+        canvas: document.querySelector("#myCanvas"),
+      });
+      let height = window.innerHeight / 2.0;
+      let width = window.innerWidth - 16;
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize( width, height );
+      // document.body.appendChild( renderer.domElement );
+      let ctrl_info = {};
+      ctrl_info.i_height = height;
+      ctrl_info.i_width = width;
+
+      let to_camera = {};
+      to_camera.x = 0; 
+      to_camera.y = 0;
+      to_camera.z = 100;
+      to_camera.max_z = 90;
+      const camera = new THREE.PerspectiveCamera( 45, width / height, 1, 500 );
+      console.log("幅:" + height);
+      camera.position.set( to_camera.x, to_camera.y, to_camera.z );
+      camera.lookAt( 0, 0, 0 );
+
+
+      const scene = new THREE.Scene();
+      const material = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth:2 } );
+      let line = null;
+      let field_guide = {};
+
+      function unitVec(vec) {
+        let r = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+        return {x: (vec.x / r), y: (vec.y / r), r : r};
+      }
+
+
+
+
+      field_guide.updateLine = function(p) {
+        ctrl_info.p_len = p.length;
+        ctrl_info.p = p;
+
+        scene.remove(line);
+        console.log("点数：" + p.length);
+        const lpoints = [];
+        let sum_x = 0;
+        let sum_y = 0;
+        for (let i = 0; i < p.length; i++) {
+          console.log("x:" + p[i][0] + ", y:" + p[i][1]);
+          sum_x += p[i][0];
+          sum_y += p[i][1];
+        }
+        let center_x = sum_x / p.length;
+        let center_y = sum_y / p.length;
+        to_camera.x = center_x;
+        to_camera.y = center_y;
+        console.log("カメラx：" + sum_x);
+        to_camera.cx = center_x;
+        to_camera.cy = center_y;
+
+        let max = 0;
+        for (let i = 0; i < p.length; i++) {
+          console.log("x:" + p[i][0] + ", y:" + p[i][1]);
+          let mx = Math.abs(p[i][0] - center_x);
+          let my = Math.abs(p[i][1] - center_y);
+          if (max < mx) {
+            max = mx;
+          }
+          if (max < my) {
+            max = my;
+          }
+          to_camera.mx = mx;
+          to_camera.my = my;
+          to_camera.my = max;
+          console.log("マックス：" + max);
+          if (width > height) {
+            to_camera.z = height * max / height * 3;
+          } else {
+            to_camera.z = width * max / width * 3;
+          }
+          if (to_camera.z > to_camera.max_z) {
+            to_camera.z = to_camera.max_z;
+          }
+          if (to_camera.z < 20) {
+            to_camera.z = 20;
+          }
+          lpoints.push( new THREE.Vector3(p[i][0], p[i][1], p[i][2]) );
+        }
+        const geometry = new THREE.BufferGeometry().setFromPoints( lpoints );
+        line = new THREE.Line( geometry, material );
+        scene.add( line );
+
+        let cur_x = p[p.length - 1][0];
+        let cur_y = p[p.length - 1][1];
+        // cursor.position.set(cur_x, cur_y, 0);
+        ap_cursor.tx = cur_x;
+        ap_cursor.ty = cur_y;
+        let vec = { x:(to_camera.x - cur_x), y:(to_camera.y - cur_y)};
+        vec = unitVec(vec);
+        console.log(vec);
+        // カメラ半径
+        if (vec.r > (to_camera.max_z / 5)) {
+          vec.r = (to_camera.max_z / 5);
+          to_camera.x = cur_x + vec.r * vec.x;
+          to_camera.y = cur_y + vec.r * vec.y;
+        }
+        renderer.render( scene, camera );
+      };
+      field_guide.updateToCamera = function(z, mz) {
+        to_camera.z = z;
+        to_camera.max_z = mz;
+      }
+      field_guide.getInfo = function() {
+        return { "カメラ位置" : to_camera, "制御情報" : ctrl_info };
+      }
+
+      // 基準線
+      const star_texture = new THREE.TextureLoader().load("./star.png");
+      const maru_texture = new THREE.TextureLoader().load("./maru.png");
+      const next_texture = new THREE.TextureLoader().load("./next.png");
+      const lockon_texture = new THREE.TextureLoader().load("./lockon.png");
+      star_texture.colorSpace = THREE.SRGBColorSpace;
+      // 星印マテリアル。
+      const star_mtl = new THREE.SpriteMaterial({
+        map: star_texture,
+      });
+      // 接点丸印マテリアル。
+      const maru_mtl = new THREE.SpriteMaterial({
+        map: maru_texture,
+      });
+      // 接点次印マテリアル。
+      const next_mtl = new THREE.SpriteMaterial({
+        map: next_texture,
+      });
+      // ロックオンマテリアル。
+      const lockon_mtl = new THREE.SpriteMaterial({
+        map: lockon_texture,
+      });
+      let refline_s_sprite = new THREE.Sprite(star_mtl);
+      scene.add(refline_s_sprite);
+      let refline_e_sprite = new THREE.Sprite(star_mtl);
+      scene.add(refline_e_sprite);
+      let maru_sprite = new THREE.Sprite(maru_mtl);
+      scene.add(maru_sprite);
+      let next1_sprite = new THREE.Sprite(lockon_mtl);
+      scene.add(next1_sprite);
+      let next2_sprite = new THREE.Sprite(next_mtl);
+      scene.add(next2_sprite);
+      // 現在地カーソル
+      let cur_geo = new THREE.IcosahedronGeometry(2, 0);
+      const cur_material = new THREE.MeshNormalMaterial();
+      let cursor = new THREE.Mesh(cur_geo, cur_material);
+      scene.add(cursor);
+      // アプローチリスト
+      let ap_cursor = {body :cursor , tx:0, ty:0, tz:1}
+      let ap_rlss = {body :refline_s_sprite,s:1, tx:0, ty:0, tz:-1, ts:0}
+      let ap_rles = {body :refline_e_sprite,s:1, tx:0, ty:0, tz:-1, ts:0}
+      let ap_maru = {body :maru_sprite,s:1, tx:0, ty:0, tz:-1, ts:0}
+      let ap_next1 = {body :next1_sprite,s:1, tx:0, ty:0, tz:-1, ts:0}
+      let ap_next2 = {body :next2_sprite,s:1, tx:0, ty:0, tz:-1, ts:0}
+      let ap_list = [ap_cursor, ap_rlss, ap_rles, ap_maru, ap_next1, ap_next2];
+      console.log("スプライト追加");
+
+
+      function Approaching(aplist) {
+        for (let i = 0; i < aplist.length; i++) {
+          let ap = aplist[i];
+          let fx = ap.body.position.x;
+          let fy = ap.body.position.y;
+          let fz = ap.body.position.z;
+          ap.body.position.x = fx + (ap.tx - fx) / 66;
+          ap.body.position.y = fy + (ap.ty - fy) / 66;
+          ap.body.position.z = fz + (ap.tz - fz) / 66;
+          if (ap.s) {
+            ap.s = ap.s + (ap.ts - ap.s) / 99;
+            ap.body.scale.set(ap.s, ap.s, ap.s);
+          }
+        }
+      }
+      field_guide.setApproach = function(idx, tx, ty, tz, ts) {
+        ap_list[idx].tx = tx;
+        ap_list[idx].ty = ty;
+        ap_list[idx].tz = tz;
+        ap_list[idx].ts = ts;
+      }
+      // 点光源
+      let light = new THREE.PointLight(0xFFFFFF, 10, 16, 1.0);
+      scene.add(light);
+
+      // 地面を作成
+      const plane = new THREE.GridHelper(6000, 600, 0x888888, 0x888888);
+      // plane.position.y = -100;
+      plane.rotation.x = Math.PI / 2;  
+      scene.add(plane);
+
+
+      const points = [];
+      points.push([-0.0001, 0, 0]);
+      points.push([0, 1, 0 ]);
+      points.push([0.0001, 0, 0 ]);
+      field_guide.updateLine(points);
+
+
+      window.onload = function() {
+        start_field_guide(field_guide);
+      }
+
+
+      tick();
+      function tick() {
+        cursor.rotation.y -= 0.03;
+        cursor.rotation.z -= 0.06;
+        light.position.set(0, 0, 3)
+        let fx = camera.position.x;
+        let fy = camera.position.y;
+        let fz = camera.position.z;
+        let tx = fx - (fx - to_camera.x) / 100;
+        let ty = fy - (fy - to_camera.y) / 100;
+        let tz = fz - (fz - to_camera.z) / 100;
+        Approaching(ap_list);
+        // camera.position.set(tx, ty, tz);
+        camera.position.x = tx;
+        camera.position.y = ty;
+        camera.position.z = tz;
+        camera.lookAt(tx, ty, 0);
+        renderer.render(scene, camera); // レンダリング
+        requestAnimationFrame(tick);
+      }
+
+  </script>
+  <link rel="stylesheet" href="field_guide.css" />
+  </head>
+  <body>
+    <ul class="dropmenu">
+      <li><a href="#">☰</a>
+      <ul>
+        <li><a id="refline_start">列始め</a></li>
+          <li><a id="refline_end">列終り</a></li>
+          <li><a id="work_width_3200">幅3.2m</a></li>
+          <li><a id="work_width_16000">幅16m</a></li>
+          <li><a id="myopia">近視</a></li>
+          <li><a id="noropia">通常</a></li>
+          <li><a id="hyperopia">遠視</a></li>
+          <li><br/></li>
+          <li><a id="init_guide">最初から</a></li>
+      </ul>
+      </li>
+  </ul>
+  <canvas id="myCanvas"></canvas>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <input id="msg_bar" style="width: 100%;"/>
+  <div style="visibility: hidden;">
+
+    <textarea id="result" style="width: 100%;">
+{
+  "基準起点": {},
+  "基準終点": {},
+  "作業幅": 16,
+  "経路": []
+}
+    </textarea>
+    <input id="idokeido" placeholder="緯度,経度" /><button id="addIdoKeido">経路追加</button>
+    <button id="update">更新</button>
+    <input id="to_camera" placeholder="z, 最大z" value="100, 100"/>
+    <button id="btn_to_camera">カメラ位置</button>
+    <button id="btn_get_info">制御情報表示</button>
+    <textarea id="control_info" style="width: 100%;" rows="16">
+    </textarea>
+  </div>
+  </body>
+</html>

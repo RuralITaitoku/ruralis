@@ -17,6 +17,9 @@ function start_field_guide(guide) {
     let add_btn = document.querySelector("#addIdoKeido");
     add_btn.onclick = clickAddIdoKeido;
 
+    let btn_get_farmland = document.querySelector("#btn_get_farmland");
+    btn_get_farmland.onclick = click_get_farmland;
+
     let btn_to_camera = document.querySelector("#btn_to_camera");
     btn_to_camera.onclick = clickToCamera;
 
@@ -30,6 +33,7 @@ function start_field_guide(guide) {
     noropia.onclick = click_noropia;
     let hyperopia = document.querySelector("#hyperopia");
     hyperopia.onclick = click_hyperopia;
+
 
     let init_guide = document.querySelector("#init_guide");
     init_guide.onclick = click_init_guide;
@@ -162,17 +166,22 @@ function distance(lat1, lon1, lat2, lon2) {
 function getResult() {
     let result = document.querySelector("#result");
     let jsondata;
-    if (result.value.length > 0) {
-        jsondata = JSON.parse(result.value);
-    } else {
-        if (localStorage) {
-            let log = localStorage.getItem("GPSロガー");
-            if (log) {
-                jsondata = JSON.parse(log);
+    try {
+        if (result.value.length > 0) {
+            jsondata = JSON.parse(result.value);
+        } else {
+            if (localStorage) {
+                let log = localStorage.getItem("GPSロガー");
+                if (log) {
+                    jsondata = JSON.parse(log);
+                }
+                //memo_list.splice(id, 1);
+                // localStorage.setItem("GPSロガー", JSON.stringify(memo_list));
             }
-            //memo_list.splice(id, 1);
-            // localStorage.setItem("GPSロガー", JSON.stringify(memo_list));
         }
+    } catch (error) {
+        console.error("JSON パースエラー:", error);
+        jsondata = undefined;
     }
     if (jsondata) {
         return jsondata;
@@ -357,6 +366,32 @@ function clickUpdate() {
 }
 
 
+let farmland_ido;
+let farmland_keido;
+
+function updateFarmland(ido, keido) {
+    console.log("農地更新");
+
+    let farmland_url = "/ruralis/fpolygon?ido=" + ido + "&keido=" + keido;
+    console.log("農地ポリゴンURL" + farmland_url);
+    fetch(farmland_url)
+    .then(response => response.json())
+    .then(data => {
+        let farmland = document.querySelector("#farmland_polygon");
+        farmland.value = JSON.stringify(data, null, 2);
+        // 取得したJSONデータを処理する
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+}
+
+function click_get_farmland() {
+    let idokeido = document.querySelector("#idokeido");
+    let n = idokeido.value.split(",");
+    updateFarmland(n[0].trim(), n[1].trim());
+}
+
 function clickAddIdoKeido() {
     console.log("addIdoKeido");
     let idokeido = document.querySelector("#idokeido");
@@ -364,7 +399,9 @@ function clickAddIdoKeido() {
     console.log("addIdoKeido" + n);
     addIdoKeido(n[0], n[1]);
     clickUpdate();
+    updateFarmland(n[0], n[1]);
 }
+
 
 function addIdoKeido(ido, keido) {
     console.log("addIdoKeido");

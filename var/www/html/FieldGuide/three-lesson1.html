@@ -242,7 +242,7 @@
       }
 
   </script>
-  <link rel="stylesheet" href="three-lesson1.css" />
+  <link rel="stylesheet" href="field_guide.css" />
   </head>
   <body>
     <ul class="dropmenu">
@@ -266,20 +266,24 @@
   <br/>
   <br/>
   <input id="msg_bar" style="width: 100%;"/>
-  <textarea id="result" style="width: 100%;">
+  <div style="visibility: -hidden;">
+    <textarea id="result" style="width: 100%;">
 {
   "基準起点": {},
   "基準終点": {},
   "作業幅": 16,
   "経路": []
 }
-    </textarea>
-    <input id="idokeido" placeholder="緯度,経度" /><button id="addIdoKeido">経路追加</button>
-    <button id="update">更新</button>
-    <input id="to_camera" placeholder="z, 最大z" value="100, 100"/>
-    <button id="btn_to_camera">カメラ位置</button>
-    <button id="btn_get_info">制御情報表示</button>
-    <textarea id="control_info" style="width: 100%;" rows="16">
-    </textarea>
+      </textarea>
+      <input id="idokeido" placeholder="緯度,経度" />
+      <button id="addIdoKeido">経路追加</button>
+      <button id="btn_get_farmland">農地取得</button>
+      <button id="update">更新</button>
+      <input id="to_camera" placeholder="z, 最大z" value="100, 100"/>
+      <button id="btn_to_camera">カメラ位置</button>
+      <button id="btn_get_info">制御情報表示</button>
+      <textarea id="control_info" style="width: 100%;" rows="16"></textarea>
+      <textarea id="farmland_polygon" style="width: 100%;" rows="16"></textarea>
+    </div>
   </body>
 </html>
