@@ -55,6 +55,7 @@
         ctrl_info.p = p;
 
         scene.remove(line);
+        // line.geometry.dispose();
         console.log("点数：" + p.length);
         const lpoints = [];
         let sum_x = 0;
@@ -119,14 +120,47 @@
           to_camera.y = cur_y + vec.r * vec.y;
         }
         renderer.render( scene, camera );
-      };
+      }
+
       field_guide.updateToCamera = function(z, mz) {
         to_camera.z = z;
         to_camera.max_z = mz;
       }
+
       field_guide.getInfo = function() {
         return { "カメラ位置" : to_camera, "制御情報" : ctrl_info };
       }
+
+      const farmland_mtl = new THREE.LineBasicMaterial( { color: 0xaaffaa, linewidth:2 } );
+      // const farmland_geo = new THREE.BufferGeometry().setFromPoints( lpoints );
+      // line = new THREE.Line( geometry, material );
+      // scene.add( line );
+      let farmland_lines = [];
+      field_guide.update_farmland = function(flppp) {
+          for (let i = 0; i < farmland_lines.length; i++) {
+            scene.remove(farmland_lines[i]);
+          }
+          farmland_lines = [];
+
+          for (let i = 0; i < flppp.length; i++) {
+            let flpp = flppp[i];
+            let flpoints = [];
+            for (let j = 0; j < flpp.length; j++) {
+              let flp = flpp[j];
+              flpoints.push( new THREE.Vector3(flp[0], flp[1], -1) );
+            }
+            const farmland_geo = new THREE.BufferGeometry().setFromPoints( flpoints );
+            let fl_line = new THREE.Line(farmland_geo, farmland_mtl);
+            scene.add(fl_line);
+            
+            farmland_lines.push(fl_line);
+          }
+      }
+
+      //let test_flppp = [[[0, 0], [10, 10], [-10, 15], [0,0]]];
+      // field_guide.update_farmland(test_flppp);
+
+
 
       // 基準線
       const star_texture = new THREE.TextureLoader().load("./star.png");
@@ -215,6 +249,7 @@
       field_guide.updateLine(points);
 
 
+
       window.onload = function() {
         start_field_guide(field_guide);
       }
@@ -266,8 +301,7 @@
   <br/>
   <br/>
   <input id="msg_bar" style="width: 100%;"/>
-  <div style="visibility: hidden;">
-
+  <div style="visibility: -hidden;">
     <textarea id="result" style="width: 100%;">
 {
   "基準起点": {},
@@ -275,14 +309,17 @@
   "作業幅": 16,
   "経路": []
 }
-    </textarea>
-    <input id="idokeido" placeholder="緯度,経度" /><button id="addIdoKeido">経路追加</button>
-    <button id="update">更新</button>
-    <input id="to_camera" placeholder="z, 最大z" value="100, 100"/>
-    <button id="btn_to_camera">カメラ位置</button>
-    <button id="btn_get_info">制御情報表示</button>
-    <textarea id="control_info" style="width: 100%;" rows="16">
-    </textarea>
-  </div>
+      </textarea>
+      <input id="idokeido" placeholder="緯度,経度" />
+      <button id="addIdoKeido">経路追加</button>
+      <button id="btn_get_farmland">農地取得</button>
+      <button id="update">更新</button>
+      <input id="to_camera" placeholder="z, 最大z" value="100, 100"/>
+      <button id="btn_to_camera">カメラ位置</button>
+      <button id="btn_get_info">制御情報表示</button>
+      <textarea id="control_info" style="width: 100%;" rows="16"></textarea>
+      <textarea id="farmland_polygon" style="width: 100%;" rows="16"></textarea>
+    </div>
+    <a href="https://hb.afl.rakuten.co.jp/hgc/3f786c00.b33fe05b.3f785f6f.f87f826a/?pc=http%3A%2F%2Fwww.rakuten.co.jp%2Fotentosan%2F&link_type=pict&ut=eyJwYWdlIjoic2hvcCIsInR5cGUiOiJwaWN0IiwiY29sIjoxLCJjYXQiOjEsImJhbiI6MTA1OTMyOCwiYW1wIjpmYWxzZX0%3D" target="_blank" rel="nofollow sponsored noopener" style="word-wrap:break-word;"><img src="https://hbb.afl.rakuten.co.jp/hlb/3f786c00.b33fe05b.3f785f6f.f87f826a/?sid=1&shop=otentosan&size=1&kind=2&me_id=1296241&me_adv_id=1059328&t=logo" border="0" style="margin:2px" alt="" title=""></a>
   </body>
 </html>

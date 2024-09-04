@@ -93,6 +93,7 @@ function click_init_guide() {
     msg("経路情報と基準線情報を消しました。")
     window.location.reload();
 }
+
 function click_refline_start() {
     console.log("基準起点");
     let jsondata = getResult();
@@ -366,13 +367,23 @@ function clickUpdate() {
 }
 
 
-let farmland_ido;
-let farmland_keido;
+let farmland_ido = 0.0;
+let farmland_keido = 0.0;
 
 function updateFarmland(ido, keido) {
     console.log("農地更新");
+    n_ido = Number(ido.trim());
+    n_keido = Number(keido.trim());
+    let d = distance(n_ido, n_keido, farmland_ido, farmland_keido);
+    if (d < 150) {
+        // 15m以内は何もしない。
+        console.log("d=" + d + "    150m以内は何もしない。")
+        return;
+    }
+    farmland_ido = n_ido;
+    farmland_keido = n_keido;
 
-    let farmland_url = "/ruralis/fpolygon?ido=" + ido + "&keido=" + keido;
+    let farmland_url = "/ruralis/fpolygon?ido=" + n_ido + "&keido=" + n_keido;
     console.log("農地ポリゴンURL" + farmland_url);
     fetch(farmland_url)
     .then(response => response.json())
@@ -380,6 +391,7 @@ function updateFarmland(ido, keido) {
         let farmland = document.querySelector("#farmland_polygon");
         farmland.value = JSON.stringify(data, null, 2);
         // 取得したJSONデータを処理する
+        update_farmland(data);
     })
     .catch(error => {
       console.error('Error:', error);
@@ -427,6 +439,50 @@ function addIdoKeido(ido, keido) {
     }
     jsondata["経路"].push({"緯度": Number(ido), "経度":Number(keido)})
     setResult(jsondata);
+}
+
+function check_straight() {
+
+}
+
+function update_farmland(data) {
+
+    // let result = document.querySelector("#result");
+    let jsondata = getResult();
+    let keiro = jsondata["経路"];
+    if (keiro.length < 1) {
+        return;
+    }
+    let s_ido = Number(keiro[0]["緯度"]);
+    let s_keido = Number(keiro[0]["経度"]);
+    let flppp = data["筆ポリゴン"];
+    let a_flppp = [[[]]];
+    for (let i = 0; i < flppp.length; i++) {
+        let flpp = flppp[i];
+        let a_flpp = [];
+        for (let j = 0; j < flpp.length; j++) {
+            let flp = flpp[j];
+            //console.log("" + i + ":" + j);
+            //console.log("" + i + ":" + j + ":緯度=" + flp[0]);
+            //console.log("" + i + ":" + j + ":経度=" + flp[1]);
+            let ido = flp[0];
+            let keido = flp[1];
+            let p = getIdoKeidoPoint(s_ido, s_keido, ido, keido);
+            let a_flp = [p[0], -p[1]];
+            // console.log("x=" +a_flp[0] + ",y=" + a_flp[1]);
+            a_flpp.push(a_flp);
+        }
+        if (a_flpp.length > 0) {
+            a_flpp.push(a_flpp[0]);
+        }
+        a_flppp.push(a_flpp);
+    }
+    field_guide.update_farmland(a_flppp);
+
+
+
+    //let test_flppp = [[[0, 0], [10, 10], [-10, 15], [0,0]]];
+    //field_guide.update_farmland(test_flppp);
 }
 
 function handlePositon(pos) {
