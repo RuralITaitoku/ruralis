@@ -372,18 +372,16 @@ let farmland_keido = 0.0;
 
 function updateFarmland(ido, keido) {
     console.log("農地更新");
-    n_ido = Number(ido.trim());
-    n_keido = Number(keido.trim());
-    let d = distance(n_ido, n_keido, farmland_ido, farmland_keido);
+    let d = distance(ido, keido, farmland_ido, farmland_keido);
     if (d < 150) {
         // 15m以内は何もしない。
         console.log("d=" + d + "    150m以内は何もしない。")
         return;
     }
-    farmland_ido = n_ido;
-    farmland_keido = n_keido;
+    farmland_ido = Number(ido);
+    farmland_keido = Number(keido);
 
-    let farmland_url = "/ruralis/fpolygon?ido=" + n_ido + "&keido=" + n_keido;
+    let farmland_url = "/ruralis/fpolygon?ido=" + farmland_ido + "&keido=" + farmland_keido;
     console.log("農地ポリゴンURL" + farmland_url);
     fetch(farmland_url)
     .then(response => response.json())
@@ -411,7 +409,6 @@ function clickAddIdoKeido() {
     console.log("addIdoKeido" + n);
     addIdoKeido(n[0], n[1]);
     clickUpdate();
-    updateFarmland(n[0], n[1]);
 }
 
 
@@ -438,6 +435,7 @@ function addIdoKeido(ido, keido) {
         }
     }
     jsondata["経路"].push({"緯度": Number(ido), "経度":Number(keido)})
+    updateFarmland(Number(ido), Number(keido));
     setResult(jsondata);
 }
 
